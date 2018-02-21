@@ -12,18 +12,26 @@ library(openintro)
 library(mosaicData)
 library(ggformula)
 knitr::opts_chunk$set(echo = FALSE) 
-US_counties <- countyComplete
+countyComplete
 just_numeric_names <- function(df) { res <- sapply(df, is.numeric); names(res[res])}
 ```
 
+```{r echo = FALSE}
+i1 <- selectInput("dataset", label = "Dataset", choices = c("countyComplete", "Galton"),
+                  width = "200px")
+i2 <- selectInput("variable", label = "Variable", choices = NULL, width = "200px") 
+i3 <- selectInput("graphtype", label = "Graphic type", 
+                  choices = c("histogram", "density"), width = "200px")
+p1 <- plotOutput("distribution")
+```
 
 
-R Command: `r htmlOutput("command", inline = TRUE)`
+&nbsp; | <span style="padding:200px;">&nbsp;</span>
+-------|:----------
+`r selectInput("dataset", label = "Dataset", choices = c("countyComplete", "Galton"),
+                  width = "200px")` `r selectInput("variable", label = "Variable", choices = NULL, width = "200px") ` `r selectInput("graphtype", label = "Graphic type", choices = c("histogram", "density"), width = "200px")`  | `r plotOutput("distribution")`
 
- &nbsp; | <span style="padding:200px;">&nbsp;</span>
- -------|---------
-`r selectInput("dataset", label = "Dataset", choices = c("US_counties", "Galton"))`  `r selectInput("variable", label = "Variable", choices = NULL)` `r selectInput("graphtype", label = "Graphic type", choices = c("histogram", "density"))` | `r plotOutput("density")`
-
+`r htmlOutput("command", inline = TRUE)`
 
 
 
@@ -36,19 +44,22 @@ plot_command <- reactive({
          )
   sprintf( stub, input$variable, input$dataset)
 })
+output[["command"]] <- renderText({
+  req(plot_command())
+  plot_command()
+})
 observe({
-  req(input$dataset)
-  df <- eval(parse(text = input$dataset) )
-  cat("Class of df is", class(df))
+  req(input[["dataset"]])
+  df <- eval(as.name(input[["dataset"]]))
   vnames <- just_numeric_names(df)
     
   vnames <- vnames[! vnames %in% c("FIPS")] # vars not to be shown
   updateSelectInput(session, "variable", choices = vnames, selected = vnames[3] )
 })
-output$density <- renderPlot({
+output[["distribution"]] <- renderPlot({
   eval(parse(text = plot_command()))
   })
-output$command <- renderText({HTML(paste0("<code>", plot_command(), "</code>"))})
+output[["command"]] <- renderText({HTML(paste0("<code>", plot_command(), "</code>"))})
 ```
 
 

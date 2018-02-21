@@ -14,118 +14,95 @@ library(checkr)
 library(ggformula)
 library(mosaicCore)
 library(mosaic)
+library(openintro)
 knitr::opts_chunk$set(echo = FALSE)
 tutorial_options(exercise.checker = checkr::check_for_learnr)
 ```
 
 ## StatPREP Lessons
 
-Many StatPREP lessons involve computing with data. Documents like this provide a window into a statistical and graphical computing platform. You, and your students, will need only an ordinary browser to work with StatPREP lessons. 
+Most StatPREP lessons involve computing with data. Usually, when computing is involved we think about a stand-alone computing package such as Minitab or R/RStudio that is run on it's own. But in StatPREP lessons, the computing platform is fully integrated into the lesson.  
 
-You, like many StatPREP instructors, may be just starting out teaching with statistical computing. If so, you may not know 
+This document shows the kinds of ways lessons can interact with computing. In other words, this document is a lesson showing how lessons work. 
 
-THREE LEVELS
+## Your students and computing
 
-* Interactive app
+Instructors are understandably concerned about using computing with their students. 
 
-* Just run the command
+* How will my students access the necessary software?
 
-* Modify the command a bit. This is where checking comes in.
+    StatPREP lessons are available to you and your students through an ordinary web browser. They can be accessed on a laptop, a tablet, or even a smartphone.
 
-* Modify a command a lot, or create a command from scratch.
+* How much do I have to teach my students about computing before they can start the lessons.
 
+    Many of the lessons can be followed with no previous background in computing. Usually, such lessons are designed to help students learn about computing while they are undertaking a statistical task. Some lessons focus on the computing itself, e.g. making graphics, accessing data. 
 
-## Interactive apps
+The next sections of this lesson give examples of three styles of computing activities:
+
+1. Interactive app-like activities that don't require any typing of commands.
+2. Just-run-it activities that don't require any typing of commands, but where you are welcome to experiment by modifying commands.
+
+Both (1) and (2) can be used by students with no computing experience.
+
+3. Construct a command. These are the most demanding, since students will need to construct proper commands. Some StatPREP lessons including these activities provide scaffolding to help students get the work done and some even give feedback to help guide students to a correct command.
+
+## 1. Interactive apps
+
+As an example of a no-typing computation, this little app plots out the distribution of any of several variables that the US Census uses to describe each of the counties in the US. 
+
 
 ```{r child="Distribution_app.Rmd", context = "server"}
 ```
 
-## Command blocks
+----------------------
 
-Built in to many of the documents are *command blocks* in which you can write the commands for working with data. This lesson is about using the command blocks.
+Note that this app displays the command that generates the graphics. Such displays are meant to help students start to see the structure of commands and what aspects of the commands correspond to features of the output.
 
-Command blocks contain an area for you to type and edit commands. The block immediately below is a working example. As with many StatPREP lessons, there's already a command in the box. You evaluate the command by pressing the "Run code" button. Try it, now.
 
-```{r block-0, exercise = TRUE, exercise.lines = 2}
-1 + 2
+## 2. Just run it!
+
+The second kind of activity involves an R-language command that has been pre-formed. You just need to press the "Run code" button to get the result. This command displays the documentation for the `countyComplete` data used in the previous section.
+
+```{r county-help, exercise = TRUE}
+help(countyComplete)
 ```
 
-You can put any valid R command in the command block and run it. 
+Although running such commands requires little effort by the student, we think it is still worthwhile to have the student run the command rather than just presenting the result. First, this is an easy way to engage the student. Second, the student has the possibility of modifying the command if she wants to explore. For instance, change the above command to show the documentation for the `Galton` dataset, which was also available in the previous section's app.
 
-## Command checking
+Another example: a scatter plot showing the relationship, on a county-by-county basis, of the fraction of the population that is under age 5 and the fraction that is female.
 
-Sometimes it's appropriate to check a student's submission and give some constructive feedback when the submission isn't right. When command checking is active for a block, there will be a "Submit Answer" button to trigger the checking. In the following example, 
-
-### Example Exercise
-
-Modify the command so that the multiplication produces a result of fifteen.
-
-```{r block-1, exercise = TRUE, exercise.eval = FALSE, exercise.lines = 2}
-3 + 4
+```{r county-scatter, exercise = TRUE, warning = FALSE, message = FALSE}
+gf_point(age_under_5 ~ female, data = countyComplete, alpha = 0.1) 
 ```
 
-```{r block-1-check, echo = FALSE}
+Such a graph can be the basis of a class discussion. For instance, what do you think is going on with the counties that have a population that is $< 45$% female? Or ... What might be different about the counties with a large fraction of the population younger than 5? What would you look at to check your hypothesis?
+
+Feel free to explore relationships by changing the command to show any pair of variables of interest to you. Can you find a pair that has a strong negative correlation? (Hint: Read through the documentation and look for variables that your intuition tells you should be negatively correlated.) 
+
+## 3. Constructing commands
+
+As students become more comfortable with computing, you may decide to use lessons that exercise their computing skills directly by having them construct all or part of a command. The command blocks for such activities will often have blanks to fill in or items to change. They will also have a "Submit" button that can be used to generate feedback.
+
+For instance ... The following command will generate a scatterplot when you press "Run code." Your task is to modify the command so that the plot also shows a smooth linear fit to the data. What you need to know:
+
+* The scatter plot is one *layer* of the graphics. You are going to use another layer with `gf_smooth()` which also generates a layer.
+* Connect the layers with the `%>%` symbol, called a "pipe."
+* When there are two layer-generating functions joined by a pipe, the second inherits the information you gave as arguments to the first.
+
+```{r two-layers, exercise = TRUE}
+gf_point(age_under_5 ~ female, data = countyComplete) %>% ..second_layer..
+```
+
+```{r two-layers-check, warning = FALSE, message = FALSE}
+#USER_CODE <- "gf_point(age_under_5 ~ female, data = countyComplete) %>% gf_smooth()"
+#USER_CODE <- "gf_point(age_under_5 ~ female, data = countyComplete) %>% gf_point(color = \"red\")"
+
 code <- for_checkr(USER_CODE)
-line_where(code,
-           insist(F == `*`, "Use multiplication, not {{F}}."),
-           insist(V == 15, "The result is supposed to be 15, not {{V}}."),
-           passif(TRUE, "An excellent start!"))
+code <- line_chaining(code, message = "Remember that a command producing two layers will look like `layer1(...) %>% layer2(...).")
+check_blanks(code, quote(gf_point(...) %>% ..two..),
+                    passif(two == quote(gf_smooth()), "OK, you put in the smoother. But notice that it's not a straight-line fit, as asked. To tell `gf_smooth()` to fit a straight line, give it the argument `method = \"lm\"`. Try again!"),
+                    passif(two == quote(gf_smooth(method = "lm")), "That's right."),
+                    failif(TRUE, "You want to pipe into `gf_smooth(), not `{{two}}`.")
+)
 ```
-
-The system is designed to allow a variety of intelligent checks, which can provide formative feedback.
-
-To see how this works, modify your command above to *break* it. For instance, 
-
-a. change the numbers so that the result is not 15.
-b. use addition or subtraction instead of multiplication. 
-
-The usual procedure is to use "Run Code" to develop your commands, revising them until you think they are right. At that point, go ahead and "Submit Answer."
-
-
-## Basic stats
-
-To demonstrate what R commands look like, we'll use historic data on the shape of flowers: the iris data collected by Edgar Anderson in 1935 and used by Ronald Fisher in his 1936 paper on taxonomy.
-
-
-*The `iris` table containing Anderson's data*
-
-```{r}
-sample_n(iris, size = nrow(iris))
-```
-
-
-
-Here are a few basic statistical and graphical tasks expressed using the commands:
-
-```{r species_count, exercise = TRUE, exercise.cap = "How many of each species?"}
-counts( ~ Species, data = iris)
-```
-
-```{r length_mean, exercise = TRUE, exercise.cap = "Mean and median petal length"}
-df_stats( ~ Petal.Length, data = iris, mean, median)
-```
-
-```{r length_mean_species, exercise = TRUE, exercise.cap = "Petal length broken down by species"}
-df_stats(Petal.Length ~ Species, data = iris, mean, median)
-```
-
-Now, some work for you. The `df_stats()` function can calculate more than the mean and median. Create a table showing the mean petal width broken down by species, as well as the 95% confidence interval on the mean. (We haven't given you any indication how to do this. Check out the hint!)
-
-```{r width_mean_species2, exercise = TRUE, exercise.cap = "CI on mean petal width, broken down by species"}
-df_stats(Petal.Length ~ Species, data = iris, mean, .....)
-```
-
-<div id="length_mean_species2-hint">You request particular stats by listing their name(s) as the last arguments to `qstats()`. The confidence interval on the mean is `ci.mean`.
-</div>
-
-```{r width_mean_species2-check}
-#USER_CODE <- "df_stats(Petal.Length ~ Species, data = iris, mean, ci.median)"
-code <- for_checkr(USER_CODE)
-check_blanks(code, quote(df_stats(..form.., data = iris, mean, ..stat..)),
-             failif(eval(form) == (Petal.Length ~ Species), "We tricked you. You were asked for the mean petal *width*, but the variable used in the formula is `Petal.Length`. Fix it."),
-             insist(stat == `ci.mean`, "The fourth argument to `df_stats()` should be the name of the function that calculates confidence intervals on the mean. You've used `{{stat}}` instead."),
-             passif(TRUE, "Right."))
-
-```
-
 
