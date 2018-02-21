@@ -1,0 +1,54 @@
+---
+title: "Distributions"
+runtime: shiny
+output: html_document
+---
+
+```{r setup-distribution-app, include=FALSE}
+library(shiny)
+library(mosaic)
+library(mosaicCore)
+library(openintro)
+library(mosaicData)
+library(ggformula)
+knitr::opts_chunk$set(echo = FALSE) 
+US_counties <- countyComplete
+just_numeric_names <- function(df) { res <- sapply(df, is.numeric); names(res[res])}
+```
+
+
+
+R Command: `r htmlOutput("command", inline = TRUE)`
+
+ &nbsp; | <span style="padding:200px;">&nbsp;</span>
+ -------|---------
+`r selectInput("dataset", label = "Dataset", choices = c("US_counties", "Galton"))`  `r selectInput("variable", label = "Variable", choices = NULL)` `r selectInput("graphtype", label = "Graphic type", choices = c("histogram", "density"))` | `r plotOutput("density")`
+
+
+
+
+```{r}
+plot_command <- reactive({
+  req(input$graphtype, input$variable, input$dataset)
+  stub <- switch(input$graphtype,
+         histogram = "gf_histogram( ~ %s, data = %s, fill = \"gray\")",
+         density = "gf_density( ~ %s, data = %s, fill = \"gray\")"
+         )
+  sprintf( stub, input$variable, input$dataset)
+})
+observe({
+  req(input$dataset)
+  df <- eval(parse(text = input$dataset) )
+  cat("Class of df is", class(df))
+  vnames <- just_numeric_names(df)
+    
+  vnames <- vnames[! vnames %in% c("FIPS")] # vars not to be shown
+  updateSelectInput(session, "variable", choices = vnames, selected = vnames[3] )
+})
+output$density <- renderPlot({
+  eval(parse(text = plot_command()))
+  })
+output$command <- renderText({HTML(paste0("<code>", plot_command(), "</code>"))})
+```
+
+

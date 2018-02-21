@@ -1,0 +1,131 @@
+---
+title: "Using R in StatPREP"
+output: learnr::tutorial
+tutorial:
+  id: "StatPREP/Intro_to_learnr"
+  version: 0.1
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(tidyverse)
+library(checkr)
+library(ggformula)
+library(mosaicCore)
+library(mosaic)
+knitr::opts_chunk$set(echo = FALSE)
+tutorial_options(exercise.checker = checkr::check_for_learnr)
+```
+
+## StatPREP Lessons
+
+Many StatPREP lessons involve computing with data. Documents like this provide a window into a statistical and graphical computing platform. You, and your students, will need only an ordinary browser to work with StatPREP lessons. 
+
+You, like many StatPREP instructors, may be just starting out teaching with statistical computing. If so, you may not know 
+
+THREE LEVELS
+
+* Interactive app
+
+* Just run the command
+
+* Modify the command a bit. This is where checking comes in.
+
+* Modify a command a lot, or create a command from scratch.
+
+
+## Interactive apps
+
+```{r child="Distribution_app.Rmd", context = "server"}
+```
+
+## Command blocks
+
+Built in to many of the documents are *command blocks* in which you can write the commands for working with data. This lesson is about using the command blocks.
+
+Command blocks contain an area for you to type and edit commands. The block immediately below is a working example. As with many StatPREP lessons, there's already a command in the box. You evaluate the command by pressing the "Run code" button. Try it, now.
+
+```{r block-0, exercise = TRUE, exercise.lines = 2}
+1 + 2
+```
+
+You can put any valid R command in the command block and run it. 
+
+## Command checking
+
+Sometimes it's appropriate to check a student's submission and give some constructive feedback when the submission isn't right. When command checking is active for a block, there will be a "Submit Answer" button to trigger the checking. In the following example, 
+
+### Example Exercise
+
+Modify the command so that the multiplication produces a result of fifteen.
+
+```{r block-1, exercise = TRUE, exercise.eval = FALSE, exercise.lines = 2}
+3 + 4
+```
+
+```{r block-1-check, echo = FALSE}
+code <- for_checkr(USER_CODE)
+line_where(code,
+           insist(F == `*`, "Use multiplication, not {{F}}."),
+           insist(V == 15, "The result is supposed to be 15, not {{V}}."),
+           passif(TRUE, "An excellent start!"))
+```
+
+The system is designed to allow a variety of intelligent checks, which can provide formative feedback.
+
+To see how this works, modify your command above to *break* it. For instance, 
+
+a. change the numbers so that the result is not 15.
+b. use addition or subtraction instead of multiplication. 
+
+The usual procedure is to use "Run Code" to develop your commands, revising them until you think they are right. At that point, go ahead and "Submit Answer."
+
+
+## Basic stats
+
+To demonstrate what R commands look like, we'll use historic data on the shape of flowers: the iris data collected by Edgar Anderson in 1935 and used by Ronald Fisher in his 1936 paper on taxonomy.
+
+
+*The `iris` table containing Anderson's data*
+
+```{r}
+sample_n(iris, size = nrow(iris))
+```
+
+
+
+Here are a few basic statistical and graphical tasks expressed using the commands:
+
+```{r species_count, exercise = TRUE, exercise.cap = "How many of each species?"}
+counts( ~ Species, data = iris)
+```
+
+```{r length_mean, exercise = TRUE, exercise.cap = "Mean and median petal length"}
+df_stats( ~ Petal.Length, data = iris, mean, median)
+```
+
+```{r length_mean_species, exercise = TRUE, exercise.cap = "Petal length broken down by species"}
+df_stats(Petal.Length ~ Species, data = iris, mean, median)
+```
+
+Now, some work for you. The `df_stats()` function can calculate more than the mean and median. Create a table showing the mean petal width broken down by species, as well as the 95% confidence interval on the mean. (We haven't given you any indication how to do this. Check out the hint!)
+
+```{r width_mean_species2, exercise = TRUE, exercise.cap = "CI on mean petal width, broken down by species"}
+df_stats(Petal.Length ~ Species, data = iris, mean, .....)
+```
+
+<div id="length_mean_species2-hint">You request particular stats by listing their name(s) as the last arguments to `qstats()`. The confidence interval on the mean is `ci.mean`.
+</div>
+
+```{r width_mean_species2-check}
+#USER_CODE <- "df_stats(Petal.Length ~ Species, data = iris, mean, ci.median)"
+code <- for_checkr(USER_CODE)
+check_blanks(code, quote(df_stats(..form.., data = iris, mean, ..stat..)),
+             failif(eval(form) == (Petal.Length ~ Species), "We tricked you. You were asked for the mean petal *width*, but the variable used in the formula is `Petal.Length`. Fix it."),
+             insist(stat == `ci.mean`, "The fourth argument to `df_stats()` should be the name of the function that calculates confidence intervals on the mean. You've used `{{stat}}` instead."),
+             passif(TRUE, "Right."))
+
+```
+
+
