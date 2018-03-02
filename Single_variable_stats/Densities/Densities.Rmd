@@ -1,0 +1,77 @@
+---
+title: "Densities"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(statPREP)
+library(mosaicData)
+library(ggformula)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+## Displaying variation
+
+One of the common motifs of introductory statisics is the histogram. The usual pattern applies to drawing one:
+
+- apply a function. For a histogram, that's `gf_histogram()`
+- use a one-sided formula to specify the variable to be represented in the histogram, e.g. `~ height`
+- provide a data table that contains the variable
+
+Try it.
+
+```{r hist0, exercise = TRUE}
+Galton %>%
+  gf_histogram( ~ height)
+```
+
+You can control the transparency of the bars with an additional argument, say, `alpha = 0.5`. Similarly, the fill color of the bars can be set like this: `fill = "turquoise"`. Even the outline of the bars can be shows using, say, `color = "blue"`.
+
+Set the number of bins with the `bins = ` argument, for instance, `bins = 10`. You can also specify the width of the bins, e.g. `binwidth = 2`.
+
+Histograms are so widely used that instructors tend to forget some of their pathologies for student understanding.
+
+- Variation is read by the inexperienced as differences in the heights of neighboring bars.
+- The display can depend sensitively on the choice of bin width.
+- Histograms do not generalize well. For instance, it can be very difficult to compare multiple histograms. 
+
+
+## Simple alternatives to histograms
+
+Rather than `gf_histogram()`, use 
+
+* `gf_dens(__formula__)`
+* `gf_freqpoly(__formula__)`
+* `gf_density(__formula__, fill = "blue", alpha = 0.5, color = NA)`
+
+At this point, you may think that the choice is just a matter of visual taste. As we move forward to consider multiple variables, you'll see that `gf_dens()`, `gf_freqpoly()`, and `gf_density()` can be generalized to more complicated and interesting situations.
+
+### Exercise
+
+Try each of `gf_dens()`, `gf_freqpoly()`, and `gf_density()` to create a graphic showing the distribution of heights in the `Galton` data. When using `gf_density()`, include the `fill`, `alpha` and `color` arguments one at a time to see what each of them does.
+
+```{r dens0, exercise = TRUE}
+Galton %>%
+  __gf_function__(~ height)
+```
+
+## Things to come ...
+
+As a taste of things to come try out the same thing, but adding on to the formula:
+
+- For `gf_dens()` and `gf_freqpoly()`, include `+ color:sex` in the formula.
+- For `gf_density()` and `gf_histogram()`, include `+ fill:sex` in the formula.
+
+```{r dens1, exercise = TRUE}
+Galton %>%
+  _gf_function__(~ height + __fill_or_color__:sex)
+```
+
+There are uses for the histogram display, which stacks the bars for the different sexes on top of one another. An alternative for the histogram is to add an argument `position`:
+
+- `position = "stack"` the default
+- `position = "dodge"` side-by-side
+- `position = "fill"` conditional probability
