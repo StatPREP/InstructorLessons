@@ -1,5 +1,5 @@
 ---
-title: "Single Counts & Proportions"
+title: "Single Variable Counts & Proportions"
 output: learnr::tutorial
 runtime: shiny_prerendered
 ---
@@ -9,132 +9,105 @@ library(learnr)
 library(mosaicData)
 library(tidyverse)
 library(ggformula)
-library(statPREP)
+library(mosaicCore)
 knitr::opts_chunk$set(echo = FALSE)
+load("Montana_poll.Rda")
+Montana_raw <- Montana_poll
+Short_answer <- 
+  tribble( ~ answer, ~ ans,
+           "I am not likely to vote in this election", "unlikely_voter", 
+           "Republican Greg Gianforte", "Gianforte",               
+           "Democrat Rob Quist", "Quist",  
+           "Libertarian Mark Wicks", "Wicks")    
+Montana_poll <- 
+  Montana_raw %>%
+  left_join(Short_answer)
+options(digits = 4)
 ```
-
-## Counts and proportions
-
-You can generate a one-way count with the `mtally()` function:
-
-```{r mtally0, exercise = TRUE}
-KidsFeet %>% mtally( ~ sex)
-```
-
-The one-sided formula specifies the categorical variable to be used for the count.
-
-If you want proportions rather than counts, add the argument `format = "proportion".
-
-```{r mtally1, exercise = TRUE}
-KidsFeet %>% 
-  mtally( ~ sex, format = "proportion")
-```
-
-## One-way Chi-squared
-
-The one-way chi-squared test compares *counts* to a theoretical probability distribution. To perform a chi-squared test, pipe the output of `mtally()` into `chisq.test()`:
-
-```{r mtally3, exercise = TRUE}
-KidsFeet %>% 
-  mtally( ~ sex) %>%
-  chisq.test()
-```
-
-By default, `chisq.test()` tests whether the different categories in the count (girls and boys, here) are equally likely.  You can also specify that null probability explicitly, as here where we look to see if the count is consistent with a class of two-thirds girls.
-
-```{r mtally4, exercise = TRUE}
-KidsFeet %>%
-  mtally( ~ sex) %>%
-  chisq.test(p = c(1/3, 2/3))
-```
-
-How are you to know that this is one-third boys and two-thirds girls and not the other way around? R will take the levels of a categorical variable in alphabetical order. Since B preceeds G, the boys come first. You can see this in the output of the `mtally()` command:
-
-```{r mtally6, exercise = TRUE}
-KidsFeet %>% 
-  mtally( ~ sex)
-```
-
-Be sure to make the order of the entries in `p` the same as that produced by `mtally()`.
-
-### Exercise
-
-Are the counts of girls and boys in `KidsFeet` consistent with a class that is two-thirds boys?
-
-```{r mtally5, exercise = TRUE}
-
-```
-
-<div id = "mtally5-hint">
-In specifying the `p` argument to `chisq.test()` you'll want to put the 2/3 in the boy's slot, which is the first one. (B comes before G.)
-</div>
-
 
 ## Use data tables!
 
 You know this sort of textbook problem:
 
-> *In a poll of 509 randomly selected people, 246 respondants indicated support for candidate A. What is the 95% confidence interval on the proportion of the population who support candidate A?*
+> *In a poll of 573 randomly selected people, 210 respondants indicated support for candidate A. What is the 95% confidence interval on the proportion of the population who support candidate A?*
 
-Before you start calculating quantities like $\sqrt{\frac{\hat{p}(1-\hat{p})}{n}}$, think about the problem from a basic data-science point of view. In particular, what are the data? What are the variables? What are the cases?
+In StatPREP, we take the position that 573 and 210 are not data; they are a *presentation* of data. We happen to have the [actual data](https://surveys.google.com/reporting/survey?survey=mqbskxyva7gb4h4uwgc7j6h2na), which relate to a 2017 Montana special election for its Congressional seat. (We found the data by following the link, which was published [in this story at fivethirtyeight.com](https://fivethirtyeight.com/features/fake-polls-are-a-real-problem/).)
 
-Rather than 509 and 246 being data, they are really a *data presentation*. The point of the problem is to transform one presentation into another: given $n$ and $\hat{p}$, produce a confidence interval.
+The data are stored in R under the name `Montana_poll`. Take a look at them by running the following command:
 
-
-Once you get the hang of the software, you will want to use it even for textbook problems based on data presentations rather than data tables. Anticipating this, here's how to do the above problem just with the counts.
-
-```{r with-counts, exercise = TRUE}
-prop.test(246, 509)
+```{r show_data, exercise = TRUE}
+Montana_poll
 ```
 
-Better to start with an actual data table. In addition to making clearer what the unit of observation is, showing a data table provides a chance to incorporate potential explanatory variables for the support of A.
+This lesson introduces you to tools for producing presentations in the form of counts and proportions from data tables. 
 
+## Presentations of counts
 
-## Once again, with data
+Data presentations can be graphical or tabular. The next command block contains a command for making a simple graphic. Note that the command follows the usual goal/formula/data *template*:
 
-```{r create_data}
-set.seed(101)
-.A <- tibble(candidate = rep("A", 246), 
-            sex = ifelse(runif(246) > .6, "F", "M"),
-            age = round(runif(246, min = 18, max = 86)))
-.B <- tibble(candidate = rep("B", 263-112), 
-            sex = ifelse(runif(263-112) > .3, "F", "M"),
-            age = round(runif(263-112, min = 27, max = 90))) 
-.C <- tibble(candidate = rep("C", 112),
-            sex = ifelse(runif(112) > .45, "F", "M"),
-            age = round(20 + rexp(112, rate = 1/15)))
-Poll_data <- bind_rows(.A, .B, .C) %>% sample_n(size = 509)
+- The goal is `gf_counts`.
+- The formula is `~ answer` -- a one-sided formula since we are working with only a single variable.
+- The `data` argument is `Montana_poll`.
+
+```{r count_graph, exercise = TRUE}
+gf_counts( ~ answer, data = Montana_poll)
 ```
 
-```{r ref.label = "create_data"}
-# make the above available when knitting
+Not so beautiful; the answer categories are so verbose that they overlap. This is often the case with survey data. Systems such as Survey Monkey or Google Forms encourage such a style. 
+
+To simplify the presentations, we've *recoded* the original answer categories into a short form in the variable `ans`. Go back and remake the plot using `ans` instead of `answer`.
+
+## Numerical presentations
+
+If you prefer a presentation using numbers instead of graphical bars, you merely need change the *goal* of the command to `counts()`.
+
+```{r with_counts, exercise = TRUE}
+..goal..( ~ ans, data = Montana_poll)
 ```
-For instance, the polling data might look like this:
+
+Rather have the presentation as proportions? Give another argument to convey this detail: `format = "proportion"`. Rather have it as percent? Use `format = "percent"`.
+
+## A hint of things to come 
+
+When there are multiple variables available, it's natural to wonder how one thing depends on another. For instance, suppose you want to know if men and women differ in their preferred candidates. This involves changing the *formula* argument in the template: the goal and data remain the same.
+
+```{r by_sex, exercise = TRUE}
+..goal..( ~ ans | gender, data = Montana_poll)
+```
+
+You can use `gf_counts()` or `counts()` with this new formula. For `counts()`, you can also use the `format =` argument to specify proportions or percent.
+
+Since this lesson is about counts of different categories in a *single* variable, we won't dwell on the structure of the formula beyond saying that the `|` means "given" or "conditioned on." That is, `~ ans | sex` means to find the counts of `ans` separately for the different sexes. 
+
+## IN DRAFT: Other lessons
+
+For another lesson document.
+
+
+### Recoding
+
+Interested in how to recode a categorical variable? The key is to make a new recoding data table with one line for each level of the original code. Like this:
+
+```{r recode, exercise = TRUE}
+Short_answer
+```
+
+Note that the variable name for the original code is the same as in the original data. The new code has a new name.
+
+You can probably imagine the tedious work of recoding: using `Short_answer` as a reference, go down every row of the original polling data and add in the new code. 
+
+This is an exercise in *data wrangling*. Better to have the computer do it. The complete statement is:
 
 ```{r}
-Poll_data
+Montana_poll <-
+  Montana_raw %>%
+  left_join(Short_answer)
 ```
 
-The calculation of the confidence interval of the proportion supporting A, if that's what you want, is a simple application of the confidence interval on the mean.
+### Inference
 
-```{r candidateA, exercise = TRUE, exercise.setup = "create_data"}
-Poll_data %>%
-  qstats(~ candidate == "A", mean.conf)
+Do the men and women differ in their support for Gianforte
+
+```{r}
+summary(lm(ans == "Gianforte" ~ gender, data = Montana_poll))
 ```
-
-It might surprise you to see inference on the sample proportion being a special case of inference on the mean. What makes the case special is that `candidate == "A"` is producing a variable whose value is 1 for those supporting A and zero otherwise.
-
-You might like this generalization or you might not. It's perfectly reasonable to stick with the traditional approach when calculating the confidence interval on a single proportion.
-
-But if you play the long game, you should keep in mind three of the GAISE recommendations:
-
-* Give students experience with multivariable thinking.
-* Integrate real data with a context and purpose.
-* Teach statistics as an investigative process of problem-solving and decision-making.
-
-Starting with data tables rather than data presentations has some advantages down the line. For instance, you can use the data to investigate other patterns that might be of interest such as how support for a candidate depends on age and sex.
-
-### Going further
-
-In the `qstats()` calculation above, replace the formula in the command with `candidate == "A" ~ sex`. What is the result telling you?
-
