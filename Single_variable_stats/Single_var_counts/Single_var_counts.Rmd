@@ -1,5 +1,5 @@
 ---
-title: "Single Variable Counts & Proportions"
+title: "Presenting a Categorical Variable"
 output: learnr::tutorial
 runtime: shiny_prerendered
 ---

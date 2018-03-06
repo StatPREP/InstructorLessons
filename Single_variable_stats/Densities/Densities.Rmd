@@ -1,77 +1,118 @@
 ---
-title: "Densities"
+title: "Displaying a Quantitative Variable"
 output: learnr::tutorial
 runtime: shiny_prerendered
 ---
 
 ```{r setup, include=FALSE}
 library(learnr)
-library(statPREP)
+library(mosaic)
 library(mosaicData)
 library(ggformula)
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
+## Many displays of distribution
 
-## Displaying variation
+"How do I make a histogram?" This is one of the most common early questions we get from statistics instructors starting to work with data. We think this is a wrong way to frame things; the point is not to make a histogram but to display the distribution of a quantitative variable. And, very often, the point is to *compare* the distribution of a quantitative variable across two or more groups. There are many formats for displaying distribution that are effective for comparing two or more groups. A histogram isn't the best.
 
-One of the common motifs of introductory statisics is the histogram. The usual pattern applies to drawing one:
+So, even though this lesson is about making displays that involve only a single quantitative variable, we're going to put that in the context of what you'll eventually have to do when you get to comparing distributions.
 
-- apply a function. For a histogram, that's `gf_histogram()`
-- use a one-sided formula to specify the variable to be represented in the histogram, e.g. `~ height`
-- provide a data table that contains the variable
+## The variable along the horizontal axis
 
-Try it.
+Many displays of distribution represent the variable as position along the *horizontal* axis. The vertical axis is used to represent some calculated quantity, not a variable.
 
-```{r hist0, exercise = TRUE}
-Galton %>%
-  gf_histogram( ~ height)
+### A single variable
+
+As always with calculations involving a single variable the formula component the command template is
+
+<div style="font-size: 3em;">~ x</div>
+
+For our example, we'll using the data collected by Francis Galton as part of his pathbreaking 19th century examination of the heritability of height. You can display the data with the simple command `Galton`. Or, if you want the documentation, give the command `help(Galton)`.
+
+Each row in the data is one adult. 
+
+```{r galton-data, exercise = TRUE}
+Galton
 ```
 
-You can control the transparency of the bars with an additional argument, say, `alpha = 0.5`. Similarly, the fill color of the bars can be set like this: `fill = "turquoise"`. Even the outline of the bars can be shows using, say, `color = "blue"`.
-
-Set the number of bins with the `bins = ` argument, for instance, `bins = 10`. You can also specify the width of the bins, e.g. `binwidth = 2`.
-
-Histograms are so widely used that instructors tend to forget some of their pathologies for student understanding.
-
-- Variation is read by the inexperienced as differences in the heights of neighboring bars.
-- The display can depend sensitively on the choice of bin width.
-- Histograms do not generalize well. For instance, it can be very difficult to compare multiple histograms. 
 
 
-## Simple alternatives to histograms
+The following command block contains an example of a distribution display with the variable on the x-axis.
 
-Rather than `gf_histogram()`, use 
-
-* `gf_dens(__formula__)`
-* `gf_freqpoly(__formula__)`
-* `gf_density(__formula__, fill = "blue", alpha = 0.5, color = NA)`
-
-At this point, you may think that the choice is just a matter of visual taste. As we move forward to consider multiple variables, you'll see that `gf_dens()`, `gf_freqpoly()`, and `gf_density()` can be generalized to more complicated and interesting situations.
-
-### Exercise
-
-Try each of `gf_dens()`, `gf_freqpoly()`, and `gf_density()` to create a graphic showing the distribution of heights in the `Galton` data. When using `gf_density()`, include the `fill`, `alpha` and `color` arguments one at a time to see what each of them does.
-
-```{r dens0, exercise = TRUE}
-Galton %>%
-  __gf_function__(~ height)
+```{r x-axis, exercise = TRUE}
+gf_density( ~ height, data = Galton, fill = "lightgreen")
 ```
 
-## Things to come ...
+Perhaps you'd prefer another graphics modality, maybe one that doesn't require you to explain what the quantity on the vertical axis means.  Here are some possibilities:
 
-As a taste of things to come try out the same thing, but adding on to the formula:
+* `gf_ash()` whose name refers to "average shifted histograms"
+* `gf_histogram()` where the vertical axis is in counts.
+* `gf_dhistogram()` a histogram, but with the vertical axis as a density. 
 
-- For `gf_dens()` and `gf_freqpoly()`, include `+ color:sex` in the formula.
-- For `gf_density()` and `gf_histogram()`, include `+ fill:sex` in the formula.
+You can dress up the plots a little with these optional arguments:
 
-```{r dens1, exercise = TRUE}
-Galton %>%
-  _gf_function__(~ height + __fill_or_color__:sex)
+- `color = ` where you give the name of a color, e.g. `"lightgreen"`
+- `fill = ` which is much like `color` but controls the fill color
+- `alpha = ` a number between 0 and 1 setting the transparency. 
+
+### Two variables
+
+Just so that you can see where things are heading, look at the graphics modalities when you are comparing the distribution of height for two different groups: the males and the females.
+
+Since the variable is being plotted on the x-axis, the basic formula is still 
+
+<div style="font-size: 3em;">~ height</div>
+
+There are two basic ways to add `sex` into the plot.
+
+1. Make the formula "height given sex," that is
+    
+    <div style="font-size: 3em;">~ height | sex</div>
+
+2. Use `color` or `fill` to represent `sex`. This is called "mapping sex to color (or fill)." Since `sex` is a variable, the argument will look like this:
+    
+    <div style="font-size: 3em;">fill = ~ sex</div>
+    
+    It's advisable to set `alpha` to a mid-range value, so that you can see both distributions when one is overlaid by another.
+
+```{r height-sex, exercise = TRUE}
+gf_density( ~ height, data = Galton, fill = ~ sex, alpha = 0.5)
+gf_density( ~ height | sex, data = Galton)
 ```
 
-There are uses for the histogram display, which stacks the bars for the different sexes on top of one another. An alternative for the histogram is to add an argument `position`:
+Of course, you can use `gf_ash()`, `gf_histogram()`, or `gf_dhistogram()` instead of density. 
 
-- `position = "stack"` the default
-- `position = "dodge"` side-by-side
-- `position = "fill"` conditional probability
+## The variable along the vertical axis
+
+In statistical graphics such as scatterplots, the x- and y-axes are used for different variables, with the response variable on the y-axis. In the Galton example, a scatter plot would have height on the y-axis and sex (or mother's height, or whatever). If you introduce distributions with a modality that puts the height variable on the x-axis, students have to reconcile the two different formats, which is perhaps an unnecessary cognitive load.
+
+Here are some examples of distribution displays with the quantitative variable on the vertical axis:
+
+```{r results = "hide"}
+gf_jitter(height ~ sex, data = Galton, width = 0.2, alpha = 0.5)
+gf_violin(height ~ sex, data = Galton, fill = ~ sex, alpha = 0.5)
+gf_boxplot(height ~ sex, data = Galton, fill = ~ sex, alpha = 0.5)
+```
+
+Try them out in the command box:
+
+```{r xydistributions, exercise = TRUE}
+
+```
+
+
+Even better, you can put one mode on top of another, like this:
+
+```{r ontopof, exercise = TRUE}
+gf_jitter(height ~ sex, data = Galton, 
+          color = ~ sex, width = 0.2, alpha = 0.5) %>%
+  gf_violin(fill = ~ sex, alpha = 0.2)
+```
+
+## So many options!
+
+We're offering you a lot of options for displaying distributions. The intention is not that your students should master all of them, but that you should be able to choose.
+
+For instance, you might want to start with histograms, just because those might be the most familiar to you. ("One thing at a time, please!") But as you become more familiar with data-driven statistics, you may start to realize that the two-variable formats are more natural, tell you everything you might get out of a histogram, and address a more central question in statistics: How do groups differ from one another?
+
