@@ -112,18 +112,25 @@ gf_density( ~ height | sex, data = Galton)</code></pre>
 <div id="section-the-variable-along-the-vertical-axis" class="section level2">
 <h2>The variable along the vertical axis</h2>
 <p>In statistical graphics such as scatterplots, the x- and y-axes are used for different variables, with the response variable on the y-axis. In the Galton example, a scatter plot would have height on the y-axis and sex (or mother’s height, or whatever). If you introduce distributions with a modality that puts the height variable on the x-axis, students have to reconcile the two different formats, which is perhaps an unnecessary cognitive load.</p>
-<p>Here are some examples of distribution displays with the quantitative variable on the vertical axis:</p>
-<p><img src="Densities_files/figure-html4/unnamed-chunk-1-1.png" width="624" /><img src="Densities_files/figure-html4/unnamed-chunk-1-2.png" width="624" /><img src="Densities_files/figure-html4/unnamed-chunk-1-3.png" width="624" /></p>
+<p>Here are some examples of commands to create distribution displays with the quantitative variable on the vertical axis:</p>
+<pre class="r"><code>gf_jitter(height ~ sex, data = Galton, width = 0.2, alpha = 0.5)
+gf_violin(height ~ sex, data = Galton, fill = ~ sex, alpha = 0.5)
+gf_boxplot(height ~ sex, data = Galton, fill = ~ sex, alpha = 0.5)</code></pre>
 <p>Try them out in the command box:</p>
 <div class="tutorial-exercise" data-label="xydistributions" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
 </div>
-<p>Even better, you can put one mode on top of another, like this:</p>
+<div id="section-teaching-about-the-displays" class="section level3">
+<h3>Teaching about the displays</h3>
+<p>For the purpose of helping students understand graphics, it can be useful to show more than one mode at a time, layering them on top of one another. To do this, use <code>%&gt;%</code> to “pipe” one graphics layer into another.</p>
 <div class="tutorial-exercise" data-label="ontopof" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>gf_jitter(height ~ sex, data = Galton, 
           color = ~ sex, width = 0.2, alpha = 0.5) %&gt;%
   gf_violin(fill = ~ sex, alpha = 0.2)</code></pre>
 <script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+<p>This is quite a long command, so perhaps not one you want to make a learning objective for your students.</p>
+<p>It’s worth pointing out that the formula and data components of the first graphics command get inherited by any subsequent commands.</p>
 </div>
 </div>
 <div id="section-so-many-options" class="section level2">

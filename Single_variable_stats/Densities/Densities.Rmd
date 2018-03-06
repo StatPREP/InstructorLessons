@@ -87,9 +87,9 @@ Of course, you can use `gf_ash()`, `gf_histogram()`, or `gf_dhistogram()` instea
 
 In statistical graphics such as scatterplots, the x- and y-axes are used for different variables, with the response variable on the y-axis. In the Galton example, a scatter plot would have height on the y-axis and sex (or mother's height, or whatever). If you introduce distributions with a modality that puts the height variable on the x-axis, students have to reconcile the two different formats, which is perhaps an unnecessary cognitive load.
 
-Here are some examples of distribution displays with the quantitative variable on the vertical axis:
+Here are some examples of commands to create distribution displays with the quantitative variable on the vertical axis:
 
-```{r results = "hide"}
+```{r echo = TRUE, results = "hide", eval = FALSE}
 gf_jitter(height ~ sex, data = Galton, width = 0.2, alpha = 0.5)
 gf_violin(height ~ sex, data = Galton, fill = ~ sex, alpha = 0.5)
 gf_boxplot(height ~ sex, data = Galton, fill = ~ sex, alpha = 0.5)
@@ -101,14 +101,19 @@ Try them out in the command box:
 
 ```
 
+### Teaching about the displays
 
-Even better, you can put one mode on top of another, like this:
+For the purpose of helping students understand graphics, it can be useful to show more than one mode at a time, layering them on top of one another. To do this, use `%>%` to "pipe" one graphics layer into another.
 
 ```{r ontopof, exercise = TRUE}
 gf_jitter(height ~ sex, data = Galton, 
           color = ~ sex, width = 0.2, alpha = 0.5) %>%
   gf_violin(fill = ~ sex, alpha = 0.2)
 ```
+
+This is quite a long command, so perhaps not one you want to make a learning objective for your students. 
+
+It's worth pointing out that the formula and data components of the first graphics command get inherited by any subsequent commands.
 
 ## So many options!
 
