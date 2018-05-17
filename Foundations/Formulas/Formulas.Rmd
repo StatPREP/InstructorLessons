@@ -3,6 +3,7 @@ title: "Formulas"
 output: 
   learnr::tutorial:
     progressive: false
+    df_print: default
 tutorial:
   id: StatPREP/Formulas
   version: 0.1
@@ -11,12 +12,12 @@ runtime: shiny_prerendered
 
 ```{r setup, include=FALSE}
 library(learnr)
-library(checkr)
+#library(checkr)
 library(mosaic)
 library(tibble)
 library(ggformula)
 data(Galton, package = "mosaicData")
-tutorial_options(exercise.checker = checkr::check_for_learnr)
+#tutorial_options(exercise.checker = checkr::check_for_learnr)
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
@@ -138,11 +139,11 @@ Each of the blanks plays a specific role.
 
 
 * **`function`** will be replaced with the name of the operation you want to perform. There are a couple dozen  such operations that you will encounter frequently. Here, consider these two:    
-    1. `qstats` which calculates basic statistics.
+    1. `df_stats` which calculates basic statistics.
     2. `gf_point` which constructs scatter plots. 
 * **`formula`** is a formula, usually containing variables in the data table.
 * **`data_table`** will be the name of a data table on which you want to perform the operation. `Galton` is such a name.
-* **`...`**. Many functions take additional arguments specifying details of the operation. What these details are depends on the operation, and not all functions require additional arguments. For instance, the `qstats()` function you will use next takes an additional argument specifying what statistic (e.g. the mean) to calculate.
+* **`...`**. Many functions take additional arguments specifying details of the operation. What these details are depends on the operation, and not all functions require additional arguments. For instance, the `df_stats()` function you will use next takes an additional argument specifying what statistic (e.g. the mean) to calculate.
 
 ## One- and two-sided formulas
 
@@ -155,20 +156,21 @@ Keep in mind the basic structure of a command:
 Almost always, the formula used when applying a function will contain the names of variables in the `__data__` table. To illustrate, consider the `Galton` data table, which looks like this.
 
 ```{r echo = FALSE}
-options(tibble.print_min = 4)
-print(as_tibble(Galton))
+# options(tibble.print_min = 4)
+# print(as_tibble(Galton))
+SDSdata::SDS_table(Galton, show_n = 4)
 ```
 
 
 If there is just one variable involved in the operation, the name of that variable goes in the right-hand slot and the left one is unused. For instance:
 
 ```{r qstat1, exercise = TRUE}
-qstats( ~ height, data = Galton,  mean)
+df_stats( ~ height, data = Galton,  mean)
 ```
 
 When there are two variables involved, typically one goes on the left of ![](images/tilde-small.png) and the other on the right, for instance:
 ```{r qstat2, exercise = TRUE}
-qstats(height ~ sex, data = Galton, mean)
+df_stats(height ~ sex, data = Galton, mean)
 ```
 
 ### Exercise

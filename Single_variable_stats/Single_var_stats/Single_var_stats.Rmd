@@ -18,7 +18,7 @@ library(mosaicData)
 library(mosaicCore)
 library(NHANES)
 knitr::opts_chunk$set(echo = FALSE)
-tutorial_options(exercise.checker = checkr::check_for_learnr)
+# tutorial_options(exercise.checker = checkr::check_for_learnr)
 ```
 
 ## Organizing statistics
@@ -111,7 +111,7 @@ If you wish to use a confidence level or coverage level different from 95%, spec
 You can also use `df_stats()` to calculate proportions. The functions `prop()` and `ci.prop()` can be used. They take an argument `success = ` specifying what you want the proportion of. For instance, to calculate the proportion of females in different sectors of the economy, `df_stats(~ sex, data = CPS85, prop(success = "F"))`
 
 
-```{r tidy_stats_qstats_default}
+```{r df_stats_default}
 quiz(
   question("Which of the following statistics is *not* in the default set produced by `df_stats()`?",
     answer("the median"),

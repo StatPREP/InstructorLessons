@@ -1,0 +1,115 @@
+---
+title: "Data Frames"
+output: 
+  learnr::tutorial:
+    progressive: false
+    df_print: default
+tutorial:
+  id: StatPREP/Frames
+  version: 0.1
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(tidyverse)
+library(mosaic)
+library(ggformula)
+Baseball <- read_csv("http://tiny.cc/mosaic/ALWINS.csv")
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+## Tidy data
+
+As described in the [notes](https://dtkaplan.github.io/SDS/tidy-data.html), tidy data is a rectangular arrangement of rows and columns.
+
+* Each column is a *variable*. All the entries in any given column must be the same kind of thing, e.g. a weight in kilos, the name of a town, ...
+* Each row refers to one *case* or *instance*, for example, a person or an urban area. All the rows must be the same kind of thing, called the "unit of analysis." Among other things, this means that there must not be rows which are summaries of other rows. After all, considering a table whose unit of observation is a person, a summary of a bunch of people is not itself a person.
+* Columns have names: the variable names.
+
+## Data frames
+
+Tidy data is stored in *data frames*. In R, there are several types of objects that act as data frames: tibbles, data.frames, etc. Happily, the different types of data frame objects interoperate well.
+
+### Data files
+
+Storage on computers is mainly done using *files*, something that's probably familiar to you from word processors, spreadsheets, etc. There are many kinds of files used to store data. 
+
+- CSV format: a simple text spreadsheet file
+- Spreadsheet formats such as XLSX
+- Data files associated with statistics software packages such as STATA, SPSS, R, and so on.
+
+Typically all you have to know about a data file is its name and location. This applies to files stored on the internet as well as files stored locally on your computer. For instance, the URL name `"http://tiny.cc/mosaic/ALWINS.csv"` describes the location of a file containing data on baseball. Often, your browser will display the contents of a data file. For instance, follow [this link](http://tiny.cc/mosaic/ALWINS.csv) to see the baseball file. (Some browsers may download the file to your computer rather than displaying it in teh browser window.)
+
+### Loading data
+
+Data stored in files must be "loaded" or "read" in to R before applying statistics and graphics commands to them. There are many ways to do this, depending on the kind of file used to store the data. For now, we'll consider just two ways to load data.
+
+#### CSV files
+
+Data stored in CSV files can be read in to R using the `read_csv()` function. The name of the file, as a quoted string, is an argument. Typically, you assign a name to the data frame produced by `read_csv()`. Here's an example. (When you press "Run Code", it may seem that nothing happens. But in fact the data file has been read in to R and stored under the assigned name.)
+
+
+```{r baseball0, exercise = TRUE, message = FALSE}
+Baseball <- read_csv("http://tiny.cc/mosaic/ALWINS.csv")
+```
+
+#### R-package data
+
+Many of the data tables we will use in these notes have already been loaded into R by instructing R to use a *library* or *package* containing the data. This is the case with the `Galton` example, which comes from the `mosaicData` package.
+
+For the present, you don't need to be concerned with how to load R-package data. It will be done for you. But do remember that somewhere there is a computer file containing the data and that it is being loaded in to R with software appropriate for that format of file.
+
+### Viewing data frames
+
+Often it's helpful to see what a data frame looks like. The simplest way is to print the data frame to the screen. Several functions are available for this:
+
+* `head()` which displays the first several rows of the data frame.
+* `names()` which displays the names of the variables.
+* `glimpse()` which gives information about each variable.` 
+* `nrow()` which gives the numbe of rows in the data frame.
+* `ncol()` which tells how many variables there are.
+
+Apply each of these functions to `Baseball` to see what it does.
+
+```{r viewbaseball, exercise=TRUE, exercise.cap = "Viewing aspects of a data frame."}
+__view_function__(Baseball)
+```
+
+## Accessing variables
+
+Programmers in R have all sorts of ways to refer to a variable in a data frame. You will see notation such as `$`, `[]`, and `[[]]`. In these tutorials, we will be using the MOSAIC style for computing in which these special notations are not needed. Instead, there is a simple rule:
+
+> To refer to a variable in a data frame, use the name of that variable in a **formula** as an argument to a function. Specify the data frame itself with the `data = ` argument to the function.
+
+Some examples will illustrate this.
+
+```{r basic_plot, exercise = TRUE, exercise.cap = "Accessing variables from a data frame."}
+gf_point(Wins ~ BattingAvg, data = Baseball) 
+df_stats( ~ BattingAvg, data = Baseball, median, range)
+```
+
+## Selecting variables
+
+Sometimes you want to look at just a single or a few variables from a data frame. The `select()` function is useful here:
+
+```{r select, exercise=TRUE}
+select(Baseball, BattingAvg)
+```
+
+If you want more than one variable, give the additional variable names as arguments to `select()`, remembering to separate the arguments by commas (as always).
+
+By default, the output of any command will be displayed on the screen. Often, you'll want to assign a name to the output so that you can refer to it in subsequent commands. Modify the above command to assign the name `Small` to the output of `select()`. Then, on another line, use `glimpse()` to look at `Small`.
+
+## The codebook
+
+How are you to know what are the physical units of a quantitative variable or the legitimate levels of a categorical variable? This information is contained in a *codebook* associated with the data table. Codebook can take the form of an actual book, a text file, a spreadsheet, a PDF document, etc.
+
+Many of the data tables we will be working with have codebooks available through the R `help()` system. For instance, the following command chunk will display the codebook for the `Galton` data table:
+
+```{r codebook0, exercise = TRUE, exercise.cap = "Getting an R codebook."}
+help(Galton)
+```
+
+

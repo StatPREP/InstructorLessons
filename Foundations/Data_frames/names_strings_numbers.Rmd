@@ -1,0 +1,24 @@
+---
+title: "Names, Strings & Numbers"
+output: 
+  learnr::tutorial:
+    progressive: false
+    df_print: default
+tutorial:
+  id: StatPREP/Frames
+  version: 0.1
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(tidyverse)
+library(mosaic)
+library(ggformula)
+Baseball <- read_csv("http://tiny.cc/mosaic/ALWINS.csv")
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+## To quote or not to quote
+

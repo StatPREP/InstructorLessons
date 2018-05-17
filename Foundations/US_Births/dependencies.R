@@ -1,7 +1,0 @@
-# library(checkr)
-library(statPREP)
-library(tibble)
-library(ggformula)
-library(mosaic)
-library(mosaicData)
-library(NHANES)

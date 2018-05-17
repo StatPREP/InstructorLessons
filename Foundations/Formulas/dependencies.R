@@ -1,6 +1,7 @@
 require(tidyverse)
+require(mosaic)
 require(mosaicData)
-require(DataComputing)
+require(mosaicCore)
 require(ggformula)
-require(checkr)
-require(statPREP)
+#require(checkr)
+
