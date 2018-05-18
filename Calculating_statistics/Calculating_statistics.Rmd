@@ -1,0 +1,160 @@
+---
+title: "Calculating Statistics"
+output: 
+  learnr::tutorial:
+    progressive: false
+tutorial:
+  id: StatPREP/BasicDescriptiveStats
+  version: 0.1
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(mosaic)
+library(ggformula)
+library(mosaicData)
+library(mosaicCore)
+library(NHANES)
+knitr::opts_chunk$set(echo = FALSE)
+# tutorial_options(exercise.checker = checkr::check_for_learnr)
+```
+
+## `df_stats`
+
+The MOSAIC `df_stats()` function calculates numerical summaries of a variable. It follows the usual MOSAIC template
+
+    goal(formula, data = data_frame, additional_specifics)
+    
+The "additional_specifics" list the particular statistics you want calculated. 
+
+For example, here is the `df_stats()` command to find the mean height of the adult children in Galton's 1880 collection of height measurements.  
+
+```{r df_stats0, exercise = TRUE}
+df_stats( ~ height, data = Galton, mean)
+```
+
+Note: If you want more information about the `Galton` data frame, you can give the command `help(Galton)` in the command block.
+
+Using a two-sided formula causes groupwise statistics to be calculated. Try this:
+
+```{r df_stats2, exercise = TRUE}
+df_stats( height ~ sex, data = Galton, mean)
+```
+
+## Groups of statistics
+
+Often, statiatics such as the mean need to be put in context of other statistics. For instance, a confidence interval on the mean is usually calculated by combining three numbers: the mean, the standard deviation, and the sample size n. You can calculate all three at once:
+
+```{r df_stats3, exercise = TRUE}
+df_stats( height ~ sex, data = Galton, mean, sd, length)
+```
+
+Since confidence intervals are such a common inferential description, `df_stats()` makes it easy to calculate them directly.
+
+```{r df_stats4, exercise = TRUE}
+df_stats( height ~ sex, data = Galton, mean, ci.mean)
+```
+
+
+
+### Exercise
+
+The `KidsFeet` data table contains measurements of foot length and width for 3rd and 4th graders.
+
+Look at the codebook to see what variables are included.
+
+```{r kidsfeet0, exercise = TRUE}
+help(KidsFeet)
+```
+
+Use `df_stats()` to construct a data table which will break down the mean width into four groups, girls whose `biggerfoot` is `"R"`, boys whose `biggerfoot` is `"R"`, girls whose `biggerfoot` is `"L"`, and boys whose `biggerfoot` is `"L"`.
+
+```{r girls-bigger, exercise = TRUE, exercise.cap = "Create a statistical summary of foot width"}
+df_stats(width ~ ____ + ____, data = KidsFeet, mean)
+```
+
+<div id="girls-bigger-hint">For the right-hand side of the formula, figure out which variables are needed to specify girls with a right biggerfoot.</div>
+
+## What stats are available?
+
+The `df_stats()` function is a clearinghouse for calculating many different numerical summaries of a quantitative variable. This consolidation helps to guarantee a consistent form of input and output. Many different descriptive statistics are available.
+
+The default set. These will be calculated if you don't give any specific statistic as an argument:
+
+- `mean`
+- `sd` -- the standard deviation
+- `length` -- the number of cases
+- `median`
+- `Q1` -- the boundary of the first quartile
+- `Q3` -- the boundary of the third quartile
+- `min`
+- `max`
+- `missing` -- how many of the `n` cases have a missing value
+
+You can also compute
+- `coverage` -- giving the range of the central 95% of the variable.
+
+And these inferential statistics are available:
+
+- `ci.mean` -- Confidence interval on the mean
+- `ci.median` -- Confidence interval on the median
+- `ci.sd` -- Confidence interval on the standard deviation
+- `coverage` -- The range covered by the central 95% of the data.
+
+If you wish to use a confidence level or coverage level different from 95%, specify the level as an argument, e.g., `ci.mean(level = 0.80)`.
+
+
+
+```{r df_stats_default}
+quiz(
+  question("Which of the following statistics is *not* in the default set produced by `df_stats()`?",
+    answer("the median"),
+    answer("the number of cases"),
+    answer("the interquartile interval", correct = TRUE),
+    random_answer_order = TRUE,
+    allow_retry = TRUE
+  ),
+  question("Which of the following is *not* a statistic provided by `df_stats()`?",
+    answer("ci", correct = TRUE),
+    answer("coverage"),
+    answer("ci.median"),
+    answer("ci.sd"),
+    random_answer_order = TRUE,
+    allow_retry = TRUE
+  )
+)
+```
+
+## Extra: Early inference
+
+Since it's so easy to calculate a confidence interval, why not do it immediately after you introduce the descriptive statistic itself?. You can talk about "precision" as a general concept, formats for presenting precision (e.g. the lower and upper bounds of an interval or the ± format), and show some properties of precision (for instance, the typical scaling as 1/√n).
+
+The `df_stats()` function handles confidence intervals on the sample median and sample standard deviation (as well as the sample mean), so you can introduce precision as a general concept. 
+
+To illustrate, here's a calculation of the confidence interval on mean height in the `NHANES` data frame. (Remember, `help(NHANES)` will get you to the metadata.) The `head()` function is used to get the specified number of rows from the data frame. 
+
+```{r rootn, exercise = TRUE, message = FALSE}
+df_stats( ~ Height, data = head(NHANES,  100), ci.mean)
+df_stats( ~ Height, data = head(NHANES,  400), ci.mean)
+df_stats( ~ Height, data = head(NHANES, 1600), ci.mean)
+```
+
+## Extra: Graphing the output
+
+It's common when presenting grouped statistics to display them graphically. The output of `df_stats()` is arranged to make this relatively easy to do. To illustrate, here is the calculation of the median wage of workers recorded in a 1985 Current Population Survey study, excerpted in the `CPS85` data table. We'll break down the calculation by the sex of the worker and the sector of the economy in which he or she worked.
+
+```{r cps1, exercise = TRUE}
+df_stats(wage ~ sector + sex, data = CPS85, median, ci.median)
+```
+
+Suppose you want a graphic comparing the median wages of the two sexes for each of the employment sectors. Since the output of the `df_stat()` calculation is a data frame, we can use all the standard graphics tools for graphing that output.
+
+```{r cps2, exercise = TRUE}
+df_stats(wage ~ sector + sex, data = CPS85, ci.median) %>%
+gf_errorbar(lower + upper ~ sector,
+            color = ~ sex, 
+            position = "dodge", width = 0.3) %>%
+  gf_labs(y = "Median wage (95% CI)")
+```
+

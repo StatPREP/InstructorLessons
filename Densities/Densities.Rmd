@@ -1,7 +1,9 @@
 ---
-title: "Displaying a Quantitative Variable"
-output: learnr::tutorial
+title: "Histograms and better"
+resource_files:
+- dependencies.R
 runtime: shiny_prerendered
+output: learnr::tutorial
 ---
 
 ```{r setup, include=FALSE}
