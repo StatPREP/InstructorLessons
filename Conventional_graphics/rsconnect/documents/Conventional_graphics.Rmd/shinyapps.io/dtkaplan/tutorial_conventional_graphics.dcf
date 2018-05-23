@@ -1,0 +1,12 @@
+name: tutorial_conventional_graphics
+title: tutorial_conventional_graphics
+username:
+account: dtkaplan
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 347733
+bundleId: 1389219
+url: https://dtkaplan.shinyapps.io/tutorial_conventional_graphics/
+when: 1527087073.29347
+asMultiple: FALSE
+asStatic: FALSE
