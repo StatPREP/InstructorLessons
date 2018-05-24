@@ -1,6 +1,9 @@
 Additional tutorials that we might want to repurpose:
 
-#. The globe toss. Write up instructions for the globe toss, including a link to the spreadsheet.
+#. The globe toss. 
+    - Check out the instructions for setting up the sheet.
+    - Create the template document described in the last section and post it on the website.
+    - Fix the exercise chunks so that the caption shows up.
 #. [Regression](https://dtkaplan.shinyapps.io/SimpleRegression/#section-explanatory-variables-1). Re-write this using `mosaicModel`.
 #. [Hypothesis tests](https://dtkaplan.shinyapps.io/Htest/#section-independence-in-two-way-tables) simplify this into two lessons: means and proportions. 
 #. [Contingency tables](https://dtkaplan.shinyapps.io/Htest/#section-independence-in-two-way-tables) Instructor tutorial to encourage them to use the Fisher test.
