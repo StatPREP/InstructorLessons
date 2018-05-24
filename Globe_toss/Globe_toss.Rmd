@@ -89,10 +89,10 @@ gf_line(frac_ocean ~ toss, data = Globe) %>%
 ```{r forcalculations2, exercise = TRUE, message=FALSE, exercise.setup = "read_data", caption="More space for calculations"}
 Globe <- 
   Globe %>%
-  filter(name %in% c("africa", "asia"))
+  filter(name %in% c("africa", "asia")) %>%
   mutate(toss = row_number(), 
-         frac_ocean = cumsum(name = "africa") / toss)
-gf_line(frac_ocean ~ toss, data = Globe) %>%
+         frac_africa = cumsum(name == "africa") / toss)
+gf_line(frac_africa ~ toss, data = Globe) %>%
   gf_point()
 ```
 
