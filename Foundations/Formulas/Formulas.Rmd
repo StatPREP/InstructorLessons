@@ -49,7 +49,7 @@ R provides a concise notation for describing the role that one or more variables
 Formulas always involve the tilde character.
 
 ```{r echo = FALSE, fig.align = "center"}
-knitr::include_graphics("images/tilde.png")
+knitr::include_graphics("images/tilde-medium.png")
 ```
 
 As a typewritten character, `~`, it's quite small and easy to miss. And in a small font, the ![](images/tilde-small.png) isn't much different from the minus sign (`-`). But tilde means something completely different from minus.

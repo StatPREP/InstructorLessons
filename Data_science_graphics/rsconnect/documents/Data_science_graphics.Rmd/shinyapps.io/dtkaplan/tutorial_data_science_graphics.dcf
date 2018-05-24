@@ -1,0 +1,12 @@
+name: tutorial_data_science_graphics
+title: tutorial_data_science_graphics
+username:
+account: dtkaplan
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 347929
+bundleId: 1390051
+url: https://dtkaplan.shinyapps.io/tutorial_data_science_graphics/
+when: 1527117388.94399
+asMultiple: FALSE
+asStatic: FALSE
