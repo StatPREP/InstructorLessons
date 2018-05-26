@@ -75,7 +75,7 @@ Globe %>%
 
 ## How much is ocean?
 
-```{r forcalculations, exercise = TRUE, message=FALSE, exercise.setup = "read_data", caption="Your stat calculations"}
+```{r forcalculations, exercise = TRUE, message=FALSE, exercise.setup = "read_data", exercise.cap="Your stat calculations"}
 Globe <- 
   Globe %>%
   mutate(toss = row_number(), 
@@ -86,7 +86,7 @@ gf_line(frac_ocean ~ toss, data = Globe) %>%
 
 ## How big is Africa versus Asia?
 
-```{r forcalculations2, exercise = TRUE, message=FALSE, exercise.setup = "read_data", caption="More space for calculations"}
+```{r forcalculations2, exercise = TRUE, message=FALSE, exercise.setup = "read_data", exercise.cap="More space for calculations"}
 Globe <- 
   Globe %>%
   filter(name %in% c("africa", "asia")) %>%
@@ -120,7 +120,11 @@ knitr::include_graphics("images/google2.png")
         
 4. Put the link on your course web site so that your students can get to it. That's how they will access the spreadsheet for entering data.
 
-5. Create the R command that will load the spreadsheet data into your R session. 
+5. Back in your Google sheet, select the File/Publish_to_the_web menu item. Use the resulting dialog box to publish the entire document. 
+
+![](images/publish1.png)&nbsp;![](images/publish2.png)
+
+6. Create the R command that will load the spreadsheet data into your R session. 
     ```r
 Globe <- gs_read(gs_key("1ucevNh7wKLtOukyEpacUKi5_-KZUQGtIOONhWRnnnQ4"))
 ```
@@ -130,14 +134,14 @@ Globe <- gs_read(gs_key("1ucevNh7wKLtOukyEpacUKi5_-KZUQGtIOONhWRnnnQ4"))
     
 Time for class!    
     
-6. Once you reach the point in your class where you want to do statistics on your data, bring up the tutorial document provided for this purpose by StatPREP [located here](). That document has several tutorial command chunks, all of which are blank. You can put any R commands in those chunks, **but make sure** that the command from step (5) always is the first command in any chunk that you use. That way, whenever you run the code in the chunk, the data will be read in from Google. Keep in mind that the chunks are all independent of one another, so you'll need to read in the data in any chunk you use.
+7. Once you reach the point in your class where you want to do statistics on your data, bring up the tutorial document provided for this purpose by StatPREP [located here](). That document has several tutorial command chunks, all of which are blank. You can put any R commands in those chunks, **but make sure** that the command from step (5) always is the first command in any chunk that you use. That way, whenever you run the code in the chunk, the data will be read in from Google. Keep in mind that the chunks are all independent of one another, so you'll need to read in the data in any chunk you use.
 
 Try it out in the following command chunk:
 
-1. Paste in the command you created in step (5).
-2. Below that, add any R commands you like.
+a. Paste in the command you created in step (5).
+b. Below that, add any R commands you like.
 
-```{r testme, exercise=TRUE, caption="Try reading your own document.", message = FALSE}
+```{r testme, exercise=TRUE, exercise.cap="Try reading your own document.", message = FALSE}
 
 ```
 

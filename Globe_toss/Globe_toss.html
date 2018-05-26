@@ -91,7 +91,7 @@ Globe &lt;- gs_read(con2)</code></pre>
 </div>
 <div id="section-how-much-is-ocean" class="section level2">
 <h2>How much is ocean?</h2>
-<div class="tutorial-exercise" data-label="forcalculations" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<div class="tutorial-exercise" data-label="forcalculations" data-caption="Your stat calculations" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>Globe &lt;- 
   Globe %&gt;%
   mutate(toss = row_number(), 
@@ -103,13 +103,13 @@ gf_line(frac_ocean ~ toss, data = Globe) %&gt;%
 </div>
 <div id="section-how-big-is-africa-versus-asia" class="section level2">
 <h2>How big is Africa versus Asia?</h2>
-<div class="tutorial-exercise" data-label="forcalculations2" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<div class="tutorial-exercise" data-label="forcalculations2" data-caption="More space for calculations" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>Globe &lt;- 
   Globe %&gt;%
-  filter(name %in% c(&quot;africa&quot;, &quot;asia&quot;))
+  filter(name %in% c(&quot;africa&quot;, &quot;asia&quot;)) %&gt;%
   mutate(toss = row_number(), 
-         frac_ocean = cumsum(name = &quot;africa&quot;) / toss)
-gf_line(frac_ocean ~ toss, data = Globe) %&gt;%
+         frac_africa = cumsum(name == &quot;africa&quot;) / toss)
+gf_line(frac_africa ~ toss, data = Globe) %&gt;%
   gf_point()</code></pre>
 <script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":false,"exercise.df_print":"paged","exercise.setup":"read_data","exercise.checker":"NULL"}</script>
 </div>
@@ -129,21 +129,25 @@ gf_line(frac_ocean ~ toss, data = Globe) %&gt;%
 <li>You will also need to copy the <em>key</em> that’s contained in the link. The key is just the central gibberish in the link, like this: <code>1ucevNh7wKLtOukyEpacUKi5_-KZUQGtIOONhWRnnnQ4</code></li>
 </ul></li>
 <li><p>Put the link on your course web site so that your students can get to it. That’s how they will access the spreadsheet for entering data.</p></li>
+<li><p>Back in your Google sheet, select the File/Publish_to_the_web menu item. Use the resulting dialog box to publish the entire document.</p></li>
+</ol>
+<p><img src="images/publish1.png" /> <img src="images/publish2.png" /></p>
+<ol start="6" style="list-style-type: decimal">
 <li><p>Create the R command that will load the spreadsheet data into your R session.</p>
 <pre class="r"><code>Globe &lt;- gs_read(gs_key(&quot;1ucevNh7wKLtOukyEpacUKi5_-KZUQGtIOONhWRnnnQ4&quot;))</code></pre>
 <p>In forming the command, replace the quoted string in the above with your own key. The key is located in the center of the link to the spreadsheet: an incomprehensible set of characters similar to that highlighted in <strong>bold</strong> in the example in step (3). You might also replace <code>Globe</code> with a name that’s more suited to your own activity.</p>
 <p>Paste the command you’ve created someplace handy. You’ll need it. (Suggestion: Paste it next to the link in step (4).)</p></li>
 </ol>
 <p>Time for class!</p>
-<ol start="6" style="list-style-type: decimal">
+<ol start="7" style="list-style-type: decimal">
 <li>Once you reach the point in your class where you want to do statistics on your data, bring up the tutorial document provided for this purpose by StatPREP <a href="">located here</a>. That document has several tutorial command chunks, all of which are blank. You can put any R commands in those chunks, <strong>but make sure</strong> that the command from step (5) always is the first command in any chunk that you use. That way, whenever you run the code in the chunk, the data will be read in from Google. Keep in mind that the chunks are all independent of one another, so you’ll need to read in the data in any chunk you use.</li>
 </ol>
 <p>Try it out in the following command chunk:</p>
-<ol style="list-style-type: decimal">
+<ol style="list-style-type: lower-alpha">
 <li>Paste in the command you created in step (5).</li>
 <li>Below that, add any R commands you like.</li>
 </ol>
-<div class="tutorial-exercise" data-label="testme" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<div class="tutorial-exercise" data-label="testme" data-caption="Try reading your own document." data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":false,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
 </div>
 <p>For instructors who want to write their own tutorial, you will find that this simplifies things since you can arrange to have the spreadsheet data read-in globally and not have to put the data-reading command in every chunk. Use the template <code>.Rmd</code> document provided by StatPREP <a href="">here</a>. Modify the chunk named <code>read_data</code> the top of the document by inserting your own command (with your own key). Notice that in any new chunk you create, you’ll have to reference the <code>read_data</code> chunk as the <code>exercise-setup</code>. The chunks already in the template document do this, so you can just copy (and rename!) an existing chunk.</p>

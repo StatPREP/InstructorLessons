@@ -1,9 +1,12 @@
 Additional tutorials that we might want to repurpose:
 
 #. The globe toss. 
-    - Check out the instructions for setting up the sheet.
     - Create the template document described in the last section and post it on the website.
-    - Fix the exercise chunks so that the caption shows up.
+    - Photograph the globe
+#. Permutation-test activity
+    - Create the cards: random integers for ID, questions:
+        * Is the Mississippi longer than <ID> miles?
+        * What is the length of the Mississippi river?
 #. [Regression](https://dtkaplan.shinyapps.io/SimpleRegression/#section-explanatory-variables-1). Re-write this using `mosaicModel`.
 #. [Hypothesis tests](https://dtkaplan.shinyapps.io/Htest/#section-independence-in-two-way-tables) simplify this into two lessons: means and proportions. 
 #. [Contingency tables](https://dtkaplan.shinyapps.io/Htest/#section-independence-in-two-way-tables) Instructor tutorial to encourage them to use the Fisher test.
