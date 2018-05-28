@@ -28,6 +28,10 @@ In their book [*Teaching Statistics: A bag of tricks*](http://www.stat.columbia.
 
 > *We ask the class how they miught estimate the proportion of the earth covered by water. After several responses, we bring out an inflatable globe. If we were to take a random sample of points on the globe, then the proportion that touched water would be a reasonable estimate of the overall proportion of water covering the earth. Better yet, we can use a confidence interval to provide an interval estimate of the overall proportion. We explain that the globe will be tossed around the class, and we instruct students to hit the globe with the tip of their index finger when it comes to them. When they do, they are to shout "water!" if their finger touches water, or "land!" if their finger touches land. After the class starts to tire of volleyball, we can use the results to construct a confidence interval for the proportion.*
 
+```{r echo=FALSE, fig.align="center", out.width="30%", fig.cap="Catching the Atlantic Ocean."}
+knitr::include_graphics("images/globe-catch.jpg")
+```
+
 We're going to modify this activity a little bit:
 
 * Rather than saying "water!" or "land!", we're going to say which body of water is involved (if it's water) or which continent (if it's land).
