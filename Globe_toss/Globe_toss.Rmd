@@ -40,11 +40,6 @@ We're going to modify this activity a little bit:
 
 To get started, the instructor should open the spreadsheet and display it to the class. Ask a student to open the spreadsheet as well; he or she will enter the data after each toss. (You'll need to have posted a link to the spreadsheet so that the student can get to it.) If you have a big class, use two or more globes and assign a student to each globe who will enter the data for that globe.
 
-
-Pictures
-
-... If the finger lands so close to the boundary, ignore that toss. Do over!
-
 At any point, you can display this tutorial to the students. It's here that you can do a statistical analysis, such as calculating the confidence interval on the proportion of tosses that resulted in water.
 
 Within R, you can access the data frame via the name `Globe`. The current version of the spreadsheet will always be used.
@@ -99,58 +94,6 @@ Globe <-
 gf_line(frac_africa ~ toss, data = Globe) %>%
   gf_point()
 ```
-
-## Setting up a new spreadsheet
-
-You can modify this document to work with a spreadsheet of your own. Here's how.
-
-1. Set up a Google spreadsheet. It's a good idea to populate it with some variable names and a few values. This will let you test to make things are working before you start the activity in class.
-2. *Within* the Google spreadsheet document press the "Share" button.
-
-    ```{r echo = FALSE}
-knitr::include_graphics("images/google1.png")
-```
-    
-3. After you press "Share," you will see a dialog box. 
-
-    ```{r echo = FALSE}
-knitr::include_graphics("images/google2.png")
-```
-    
-    - Pull down the menu to select "Anyone with the link **can edit**." (This is what lets your students add data.) 
-    - Copy the link and paste it somewhere you can get to it again. You'll need it. The link will look like this: `https://docs.google.com/spreadsheets/d/1ucevNh7wKLtOukyEpacUKi5_-KZUQGtIOONhWRnnnQ4/edit?usp=sharing`
-    - You will also need to copy the *key* that's contained in the link. The key is just the central gibberish in the link, like this: `1ucevNh7wKLtOukyEpacUKi5_-KZUQGtIOONhWRnnnQ4`
-        
-        
-4. Put the link on your course web site so that your students can get to it. That's how they will access the spreadsheet for entering data.
-
-5. Back in your Google sheet, select the File/Publish_to_the_web menu item. Use the resulting dialog box to publish the entire document. 
-
-![](images/publish1.png)&nbsp;![](images/publish2.png)
-
-6. Create the R command that will load the spreadsheet data into your R session. 
-    ```r
-Globe <- gs_read(gs_key("1ucevNh7wKLtOukyEpacUKi5_-KZUQGtIOONhWRnnnQ4"))
-```
-    In forming the command, replace the quoted string in the above with your own key. The key is located in the center of the link to the spreadsheet: an incomprehensible set of characters similar to that highlighted in **bold** in the example in step (3). You might also replace `Globe` with a name that's more suited to your own activity. 
-    
-    Paste the command you've created someplace handy. You'll need it. (Suggestion: Paste it next to the link in step (4).)
-    
-Time for class!    
-    
-7. Once you reach the point in your class where you want to do statistics on your data, bring up the tutorial document provided for this purpose by StatPREP [located here](). That document has several tutorial command chunks, all of which are blank. You can put any R commands in those chunks, **but make sure** that the command from step (5) always is the first command in any chunk that you use. That way, whenever you run the code in the chunk, the data will be read in from Google. Keep in mind that the chunks are all independent of one another, so you'll need to read in the data in any chunk you use.
-
-Try it out in the following command chunk:
-
-a. Paste in the command you created in step (5).
-b. Below that, add any R commands you like.
-
-```{r testme, exercise=TRUE, exercise.cap="Try reading your own document.", message = FALSE}
-
-```
-
-    
-For instructors who want to write their own tutorial, you will find that this simplifies things since you can arrange to have the spreadsheet data read-in globally and not have to put the data-reading command in every chunk. Use the template `.Rmd` document provided by StatPREP [here](). Modify the chunk named `read_data` the top of the document by inserting your own command (with your own key). Notice that in any new chunk you create, you'll have to reference the `read_data` chunk as the `exercise-setup`. The chunks already in the template document do this, so you can just copy (and rename!) an existing chunk. 
 
 
 
