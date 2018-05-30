@@ -3,9 +3,7 @@ Instructor notes at `StatPREP.github.io/InstructorNotes`
 
 Additional tutorials that we might want to repurpose:
 
-#. [Regression](https://dtkaplan.shinyapps.io/SimpleRegression/#section-explanatory-variables-1). Re-write this using `mosaicModel`.
-#. [Hypothesis tests](https://dtkaplan.shinyapps.io/Htest/#section-independence-in-two-way-tables) simplify this into two lessons: means and proportions. 
-#. [Contingency tables](https://dtkaplan.shinyapps.io/Htest/#section-independence-in-two-way-tables) Instructor tutorial to encourage them to use the Fisher test.
+# Statistical inference recommendations: Flesh out the stub in Remodeling Statistics on "Teaching Statistical Inference"
 #. [Resampling R](https://dtkaplan.shinyapps.io/Resampling) Update to `df_stats()` and post as an instructor tutorial.
 #. [Explaining the permutation test](https://dtkaplan.shinyapps.io/Permutation_test/#section-many-trials) as an instructor tutorial and then the t-test little app.
 #. [P value variation](https://dtkaplan.shinyapps.io/p_value_interval/) Blog post.

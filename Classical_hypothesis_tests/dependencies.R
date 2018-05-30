@@ -1,0 +1,6 @@
+require(dplyr)
+require(ggplot2)
+require(ggformula)
+require(checkr)
+require(statPREP)
+require(mosaicData)

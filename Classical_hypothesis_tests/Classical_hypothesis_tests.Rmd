@@ -1,0 +1,197 @@
+---
+title: "Classical Hypothesis Tests"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+
+
+
+```{r setup, include=FALSE}
+library(learnr)
+library(dplyr)
+library(statPREP)
+library(ggformula)
+knitr::opts_chunk$set(echo = FALSE)
+data(KidsFeet, package = "mosaicData")
+data(CPS85, package = "mosaicData")
+```
+
+
+## Introduction
+
+The table of contents of many introductory statistics textbooks includes a menagerie of statistical inference settings. A typical list is shown in Table 1.
+
+setting                  | quantities used
+-------------------------|--------------------
+a single proportion      | $\hat{p}$, $n$
+two proportions          | $\hat{p}_1$, $n_1$, $\hat{p}_2$, $n_2$
+one-sample means         | $m$, $s$, $n$
+difference of two means  | $m_1$, $s_1$, $n_1$, $m_2$, $s_2$, $n_2$
+comparing many means     | $m_1$, $s_1$, $n_1$, $m_2$, $s_2$, $n_2$, $\dots$, $m_k$, $s_k$, $n_k$
+goodness of fit          | a one-variable table of counts
+independence in two-way tables | a two-variable table of counts
+
+Table 1: *Settings for statistical inference as found in many introductory statistics books. In each setting, the inference calculations are based on the quantities used.*   
+
+The usual procedure involves three distinct steps:
+
+1. Reducing a data table to the quantities used in the calculations.
+2. Plugging those quantities into formulas.
+3. Extracting a number from a probability distribution: $z$, $t$, $\chi^2$, and so on.
+
+In textbook problems, Step 1 is almost always omitted. Instead, the book relies on previous chapters' introduction to such reduction calculations. All that is shown in the book is the handful of values for the quantities used in the calculations.
+
+A data-centric presentation of statistical calculations always involves the data themselves, not merely a reduced form of the data. With the `qstats()` and `props()` functions, you have an easy way to generate from data tables the quantities used in the textbook formula-based inference calculations.
+
+There is considerable doubt whether formulas are an effective way of teaching statistical inference. For one thing, many students struggle with the algebraic notation of the statistical inference formulas. Perhaps more important, the particular settings for inference in the textbook formulas do not adequately adjust the statistical needs of realistic problems that involve multiple variables. We will defer a discussion of this to another place.
+
+This tutorial introduces `htest()`, a tidy function for data-centric statistical inference. As you'll see, `htest()` integrates the data-reduction step, so the interface to `htest()` is essentially identical to that for `qstats()` and `props()`. 
+
+## Hypothesis test on a mean or proportion
+
+Advice: We advise you always to use data tables that include multiple variables, not just a column of numbers. This is because almost all interesting data relates multiple variables. A data table consisting of a single column of numbers is largely divorced from any real context.
+
+Recall that the `qstats()` function for calculating the mean of a variable involves a one-sided formula, for instance
+
+```{r echo = TRUE}
+qstats(~ width, data = KidsFeet, mean)
+```
+
+The `htest()` function does the calculations for the hypothesis test on the mean:
+
+```{r echo = TRUE}
+htest(~ width, data = KidsFeet)
+```
+
+A t-test is the default test conducted by `htest()`. As a rule, you'll want to specify that explicitly:
+```{r echo = TRUE}
+htest(~ width, data = KidsFeet, test = "t")
+```
+
+
+### Test with $\mu_0 \neq 0$
+
+A test can be conducted of whether a single mean is different from any specific value, not just 0. For instance, perhaps we want to see if the data provide evidence that the mean foot width is different from 9.5 cm, using the data in `KidsFeet`.
+
+A natural way to do this is with a bit of data wrangling, subtracting off the specified value from the variable.
+
+```{r echo = TRUE}
+KidsFeet %>%
+  mutate(diff_from_ten = width - 9.5) %>%
+  htest(~ diff_from_ten)
+```
+
+As a matter of convenience, you can also do the calculation *within* the `htest()` formula.
+
+```{r echo = TRUE}
+htest(~ I(width - 9.5), data = KidsFeet)
+```
+
+### Test of a sample proportion
+
+Warning: What we say next is likely going to surprise you, if you are used to calculating hypothesis tests on proportions using formulas like $\sqrt{\frac{p_0 \times (1 - p_0)}{n}}$ and tables of the Z-distribution.
+
+Compare these two calculations of the proportion of kids whose left hand is dominant in the `KidsFeet` data:
+
+```{r echo = TRUE}
+props(~ domhand, data = KidsFeet)
+```
+
+```{r echo = TRUE}
+qstats( ~ I(domhand == "L"), data = KidsFeet, mean, sd)
+```
+
+The `I()` is needed to indicate that what's in the parentheses should be treated a a single variable, the result of the calculation in the parentheses.
+
+
+A statement like `(domhand == "L")` produces a `TRUE`/`FALSE` value that is numerically 1 when the result is `TRUE` and 0 when the result is `FALSE`. Thus, calculating the mean of that value gives the proportion of cases where `domhand == "L"`.
+
+This is not just a trick. Turning a proportion into a mean means that a t-test is appropriate.
+
+```{r echo = TRUE}
+htest( ~ I((domhand == "L") - 0.25), data = KidsFeet)
+```
+
+
+## Inference comparing means or proportions
+
+Hypothesis tests involving comparison between two means or two proportions are done in the same way. For instance, is the mean foot width different between boys and girls?
+
+```{r echo = TRUE}
+htest(width ~ sex, data = KidsFeet)
+```
+
+Are the proportions of left-handers different between the sexes?
+```{r echo = TRUE}
+htest(domhand == "L" ~ sex, data = KidsFeet)
+```
+
+## "Goodness of fit"
+
+A probability model is a statement of the probability for each of a given set of events. For instance, a simple model of the probability of a baby being born in a given month is 1/12, since there are 12 months. (A better model might take into account the different lengths of the months and the empirical observations that births do not occur at a constant rate over the course of the year. But let's keep things simple.)
+
+```{r echo = TRUE}
+prob_model <- 1 / 12
+```
+
+In the `KidsFeet` data, the observed distribution of birth months is:
+
+```{r echo = TRUE}
+props( ~ birthmonth, data = KidsFeet)
+```
+
+A goodness-of-fit hypothesis test compares the observed proportions to the model. In other words, are the observed proportions `~ birthmonth` in `KidsFeet` consistent with our birth-month model?
+
+```{r echo = TRUE}
+htest( ~ birthmonth, data = KidsFeet, test = "goodness", 
+       prob_model = 1 / 12)
+```
+
+The goodness-of-fit test is more often called a "chi-squared" test. You can use that name as well. Also, the "default" probability model is a constant across all groups:
+```{r echo= TRUE}
+htest(~ birthmonth, data = KidsFeet, test = "chisq")
+```
+
+
+POSSIBLE LESSON: Does the distribution of birth months in Florida match that for the nation as a whole?
+
+
+## Independence in two-way tables
+
+Another use of the chi-squared test is to examine two-way tabulations of counts, for instance
+```{r echo = TRUE}
+counts(domhand ~ sex, data = KidsFeet, margins = TRUE)
+```
+The question of interest is whether the probability of having a given hand dominant depends on the sex of the child (and vice versa). Here, the probability model is calculated directly from the data, by cross-multiplying the marginal probabilities. The test calculation is done this way:
+
+```{r echo = TRUE}
+htest(domhand ~ sex, data = KidsFeet, test = "independence")
+```
+
+The large p-value suggests that the `KidsFeet` data do not provide evidence that the distribution of dominant hands differs between the sexes.
+
+If you prefer to name this a "Chi-squared test," you can use `test = "chisq"` instead of `"independence"`.
+
+Notice that the result in the test of independence of dominant hand and sex produced a warning, that an approximation involved in the chi-squared test may not be appropriate with these data. This approximation can be avoided by using the Fisher exact test in place of chi-squared:
+```{r echo = TRUE}
+htest(domhand ~ sex, data = KidsFeet, test = "exact")
+```
+ 
+## Advantages of a tidy approach
+
+Suggestions for teachers from the GAISE College report (p. 16)
+
+>   
+    -Focus on students’ understanding of key concepts, illustrated by a few techniques, rather
+than covering a multitude of techniques with minimal focus on underlying ideas.
+    - Pare down content of an introductory course to focus on core concepts in more depth.
+    - Perform most computations using technology to allow greater emphasis on understanding
+concepts and interpreting results.
+    - Although the language of mathematics provides compact expression of key ideas, use
+formulas that enhance the understanding of concepts, and avoid computations that are divorced from understanding.
+
+GAISE College report (p. 24)
+
+> Drills with z-, t-, χ2, and F-tables. These skills are no longer necessary and do not reflect modern statistical practice. Apps that perform the lookup (and are not limited to a finite list of df values) are available in general purpose statistical software packages, web pages, smartphones, or (soon) watches. Since statistical software produces a p-value as part of performing a hypothesis test, a shift from finding p-values to interpreting p-values in context is appropriate (see also the ASA statement on p-values: Wasserstein, R. L., and Lazar, N. A., 2016). This shift makes it unnecessary to examine students on their ability to use these tables, so they can usually be dispensed with on exams.
+

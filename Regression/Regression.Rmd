@@ -1,0 +1,173 @@
+---
+title: "Regression"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(tidyverse)
+library(ggformula)
+library(mosaicCore)
+library(mosaicData)
+library(mosaicModel)
+library(mosaic)
+library(NHANES)
+library(MASS)
+theme_set(theme_bw())
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message = FALSE)
+```
+
+## Early regression?
+
+Intro stats courses generally place regression towards the end of the course, after statistical tests on the means and proportions. And then it's broken down into "simple" regression and "multiple" regression. The later requires computing and so frequently does not appear in the syllabus. 
+
+This is a big missed opportunity. Not because simple regression is more important than other tests, but because
+
+> Regression encompasses the other statistical tests in the intro course.
+
+Which is to say, if you teach regression, the other test settings come without any additional technical apparatus. That includes one- and two-sample p and t tests and one-way and two-way ANOVA. (Even chi-squared can be replaced with regression.)
+
+Another important reason to focus on regression is that it is a natural way to implement both branches of the first recommendation of the 2016 ASA GAISE report:
+
+> Teach statistical thinking.    
+> - Teach statistics as an investigative process of problem-solving and decision-making.    
+> - Give students experience with multivariable thinking.    
+> from *Guidelines for Assessment and Instruction in Statistics Education (GAISE) College Report 2016*, p. 3.
+
+The critical relationship between regression and decision-making appears in two distinct ways:
+
+a. Regression describes relationships in terms of a physically meaningful effect size, rather than merely an abstract notion of "significance."
+b. Using regression involves making choices, particularly in the selection of explanatory variables.
+
+One sign of the importance of regression to decision-making is the framing of data-science analytics in terms of *machine learning*. 
+
+> Regression (in it's various forms) is a primary technique of machine learning.
+
+## ~~Regression~~ Explaining variability
+
+Variability plays a central role in statistics. (See, e.g. GAISE 2016 p. 10.) Early topics in introductory statistics provide a means to describe variability and quantify its extent: e.g. shapes of distribution and measures of variance such as the standard deviation, IQR, etc.
+
+A good way to think about statistics is as "the explanation of variability." The broad paradigm involves explanatory and response variables.
+
+* A **response variable** is an outcome of interest, be it whether a person favors a specific political candidate, a person's height, the price of some commodity, etc. It's a *variable* because it varies from person to person or day-to-day or, in terms of data, from one row to another in a data frame.
+* An **explanatory variable** is another quantity or characteristic that varies.
+
+The adjectives **response** and **explanatory** reflect the interests of the statistical researcher.
+
+Statistics attempts to explain or "account for" variation in the response variable using one or more explanatory variables. For example, we might be interested to explain human height (the response variable) as a function of age (an explanatory variable). The particular mode of explanation is to construct a function that takes explanatory variables as inputs and produces values for the response variable as output.
+
+To illustrate, we'll use data from the National Health and Nutrition Evaluation Survey (NHANES), looking at height as a function of age. The next command block creates a scatter plot of height versus age and overlays a particular form of model function: a straight line.
+
+```{r height-age, exercise=TRUE}
+gf_point(Height ~ Age, data = NHANES, alpha = 0.1) %>%
+  gf_lm()
+```
+
+If you were to start out a semester telling your students that the straight-line relationship is what statistics has to say, your students would understandable conclude that statistics is stilted: a linear dependence is a funny way to describe how people change in height as they age. **Don't send this message.** Instead, use a sensible kind of function to explain the relationship. 
+
+In the above chunk, change `gf_lm()` to `gf_smooth()` to get something that's less embarrassing. The resulting function can be a good topic for a class discussion: How fast do children grow? When do kids stop growing? 
+
+
+
+
+## Model-building as an abstract operation
+
+You can introduce modeling without starting with the mathematics of fitting, or even slopes and intercepts. Instead, focus on response and explanatory variables. The actual construction of a model is just as easy (on the computer) as calculating proportions or means. Here, we'll make a model and plot it out, along with the data. In the next command chunk, you'll create a model relating height and age. `lm()` refers to "linear modeling," but that doesn't mean the model has to be a straight line. Here, `ns(Age, 5)` is used to say, make a "**n**ot **s**traight" model. We chosen to have a not-straightness of 5.
+
+
+```{r model1, exercise=TRUE}
+model <- lm(Height ~ ns(Age,5), data = NHANES)
+mod_plot(model) %>%
+  gf_point(Height ~ Age, data = NHANES, alpha = 0.1)
+```
+
+A reasonable class activity is to experiment with different amounts of not-straightness, and talk about what features you like and don't like about the resulting models. 
+
+
+## Other things to do with models
+
+In the previous section, you plotted out a model function. There are other basic operations on models, particularly ...
+
+1. **Evaluate** the model for given inputs.
+2. Calculate the **effect size** for given inputs. The effect size tells how much the model output changes when the input is changed. Here, that's the slope of the curve.
+
+```{r model2}
+model <- lm(Height ~ ns(Age,5), data = NHANES)
+mod_eval(model, Age = 5)
+mod_effect(model, ~ Age, Age = 5)
+```
+Do the answers make sense. Is 113.6 a reasonable height for a five-year old? (Remember, the units of height in NHANES are cm. 113.6cm is the same as 44 inches.) How about the slope: does 2.9 cm/year make sense?
+
+See what you get for 50 year olds. Would you look at the model value or the effect size to answer whether they are still growing.
+
+A heads up for instructors, three other operations on models relate to statistical inference:
+
+3. Calculate a model's **prediction error**.
+4. **Cross-validate** a model.
+5. Create a **bootstrap ensemble** of a model. 
+
+These, along with confidence intervals on effect sizes and model outputs will be the subject of other tutorials.
+
+## Categorical explanatory variables
+
+Explanatory variables don't need to be quantitative. Let's use sex to explain height.
+
+```{r sex-height, exercise = TRUE}
+model <- lm(Height ~ Gender, data = NHANES)
+mod_eval(model, Gender = "female")
+mod_effect(model, ~ Gender, Gender = "female")
+mod_plot(model)
+```
+
+Interpret the results. Do they make sense?
+
+The plot of the model isn't very effective. This is a flaw in software and there is a plan to fix it.
+
+## Is it always A causes B?
+
+Common sense suggests that height varies with age. And, for kids, at least, weight varies with age. Does it make sense to use weight as an explanatory variable? 
+
+```{r weight, exercise = TRUE}
+model <- lm(Height ~ ns(Weight,5), data = NHANES)
+mod_plot(model, nlevels = Inf) %>%
+  gf_point(Height ~ Weight, data = NHANES, alpha = 0.05)
+mod_eval(model, Weight = 50)
+mod_effect(model, ~ Weight, Weight = 50)
+```
+
+A lot of what's going on in the relationship between height and weight has to do with age. To see some of this, let's use color to distinguish those 18 and under from the rest. Do this by adding a new argument to the call to the `gf_point()` function, namely `color = ~ Age <= 18`.
+
+Try limiting things just to those over 18 years old. You can do this by putting the command as the first line in the above block: 
+```r
+NHANES <- NHANES %>% filter(Age > 18)
+```
+
+Does weight cause height? Here's a thought experiment you can do. Take 1000 adults. Measure their height. Now have each of them add weight. Will they get taller?
+
+So even though weight and height are associated with each other in adults, one does not *cause* the other. A reasonable hypothesis is that, in adults, both variables are influenced by one or more common factors, e.g. genes for "stature."
+
+## Other factors?
+
+Regression models can include more than one explanatory variable. The following command block uses weight, sex, and educational level as explanatory variables.
+
+```{r other-factors, exercise = TRUE}
+NHANES <- NHANES %>% filter(Age > 18)
+model <- lm(Height ~ ns(Weight,5) + Gender + Education, data = NHANES)
+mod_plot(model, nlevels = Inf) %>%
+  gf_point(Height ~ Weight, data = NHANES, alpha = 0.05)
+mod_eval(model, Weight = 50)
+mod_effect(model, ~ Weight, Weight = 50)
+```
+
+Some things to experiment with are listed below. These are mainly intended to help instructors learn more about regression. If a result doesn't make sense, ask a colleague, your hub leader, or one of the StatPREP national staff.
+
+1. Try other explanatory variables than weight and education. (The `mod_plot()` function can handle up to four explanatory variables. But it can only be paired with `gf_point()`, when all explanatory variables after the first one are categorical.)
+2. Thinking that the curved shape of the models are due to "outliers" at high weight? Modern statistics provides a very rapid way to deal with this: robust regression. To use robust regression, use `rlm()` instead of `lm()`. 
+3. Notice that the curves for the different sexes and educational levels are always parallel? In the model-building command, replace the `+` with `*`.
+
+
+## What about regression encompassing t, p, and such?
+
+This will be covered in other tutorials.
+

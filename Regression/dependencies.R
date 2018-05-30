@@ -1,0 +1,8 @@
+library(tidyverse)
+library(ggformula)
+library(mosaicData)
+library(mosaic)
+library(mosaicCore)
+library(mosaicModel)
+library(NHANES)
+library(MASS)
