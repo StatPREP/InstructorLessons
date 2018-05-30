@@ -1,0 +1,12 @@
+name: Tutorial_classical_inference
+title: Tutorial_classical_inference
+username:
+account: dtkaplan
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 350910
+bundleId: 1399576
+url: https://dtkaplan.shinyapps.io/Tutorial_classical_inference/
+when: 1527647529.61613
+asMultiple: FALSE
+asStatic: FALSE

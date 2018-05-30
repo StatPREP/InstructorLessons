@@ -1,0 +1,132 @@
+---
+title: "Classical Statistical Inference"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+
+
+
+```{r setup, include=FALSE}
+library(learnr)
+library(dplyr)
+library
+library(mosaic)
+library(mosaicCore)
+library(mosaicData)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+## Introduction
+
+The table of contents of many introductory statistics textbooks includes a menagerie of statistical inference settings. A typical list is shown in Table 1.
+
+setting                  | quantities used
+-------------------------|--------------------
+a single proportion      | $\hat{p}$, $n$
+two proportions          | $\hat{p}_1$, $n_1$, $\hat{p}_2$, $n_2$
+one-sample means         | $m$, $s$, $n$
+difference of two means  | $m_1$, $s_1$, $n_1$, $m_2$, $s_2$, $n_2$
+comparing many means     | $m_1$, $s_1$, $n_1$, $m_2$, $s_2$, $n_2$, $\dots$, $m_k$, $s_k$, $n_k$
+goodness of fit          | a one-variable table of counts
+independence in two-way tables | a two-variable table of counts
+
+Table 1: *Settings for statistical inference as found in many introductory statistics books. In each setting, the inference calculations are based on the quantities used.*   
+
+The usual procedure involves three distinct steps:
+
+1. Reducing a data frame to the quantities used in the calculations.
+2. Plugging those quantities into formulas.
+3. Extracting a number from a probability distribution: $z$, $t$, $\chi^2$, and so on.
+
+In textbook problems, Step 1 is almost always omitted. Instead, the book relies on previous chapters' introduction to such reduction calculations. All that is shown in the book is the handful of values for the quantities used in the calculations.
+
+There are many problems with this approach to inference, among them:
+
+1. Students often have trouble dealing with the formulas used, whether because of general math anxiety or lack of mastery of algebraic notation.
+2. The formulas are different for each setting of statistical inference, whereas the actual logic of statistical inference is the same. Teaching the formulas obscures the logic of inference.
+3. Simple formulas are available for only a handful of statistics. As a result, the conventional statistics course focuses on this handful, even though they may not address a genuine statistical question. A particularly glaring omission is the consideration of covariates.
+4. The formulas are not data-centric. That is to say, the formulas for inference don't involve the actual data. Instead, they involve summary statistics of the data: means, standard deviations, and so on.
+
+The purpose of this tutorial is to introduce you to statistical inference calculations that work directly from the data. You'll see a handful of narrow-purpose R functions that correspond to individual settings of the table above. These provide you a capability to "teach to the tests," that is to treat the classical tests as objects in themselves, studying their behavior rather than the calculations that underlie them.
+
+*Anticipating a discussion for another time*: You may well wonder what is the point of teaching narrow-purpose R-language functions. Isn't the whole point to teach the calculation? Is the computer doing so much of the work that the student fails to learn the underlying concepts? These are important questions to discuss and we think our answers may surprise you.
+
+## Inference on means
+
+There are two main functions for doing inference on means.
+
+1. `df_stats()`, which makes it easy to produce confidence intervals.
+2. `t_test()`, which carries out the standard calculations for that hypothesis test and produces both p-values and confidence intervals.
+
+They are used in much the same way, following the goal/formula/data computational template. To illustrate, we'll look at the mean height from the `Galton` data frame (which is from Galton's study of the relationship between the heights of parents and their adult children).
+
+```{r df_stats, exercise = TRUE}
+df_stats( ~ height, data = Galton, mean, ci.mean)
+df_stats(height ~ sex, data = Galton, mean, ci.mean)
+```
+
+The first `df_stats()` calculation shows the precision of the estimate of the mean calculated from the Galton data. The second breaks this down by sex, which provides a straightforward way of comparing the two means: just check whether the two confidence intervals overlap.
+
+Note that `df_stats()` does not compute a p-value. And you may find it inadequate to compare the two means by "check[ing] whether the two confidence intervals overlap." Actually, neither of these is really a deficiency ... but, again, we'll defer that discussion to another time.
+
+The "standard" way of doing the hypothesis test on the mean (which incidentally gives the confidence interval as well) is a t-test.
+
+```{r t_test, exercise = TRUE}
+t_test( ~ height, data = Galton)
+t_test(height ~ sex, data = Galton)
+```
+### Non-zero null for the one-sample t-test
+
+The null hypothesis involved in the one-sample t-test is silly. We know enough about the nature of height to reject the hypothesis that the mean is zero. You can incorporate a non-zero null to the test by giving the argument `mu =`. For instance, try `mu = 65` in the one-sample test to see whether Galton's sample is consistent with a mean height of 65 inches. (Ask Danny why he hates to see `mu` as an argument. Hint: Gratuitous Greek.)
+
+### A data frame output
+
+The default report produced by `t_test()` is quite verbose. In other tutorials and lessons, we'll have occasion to use randomization techniques to study the t-test. You can force `t_test()` to produce an output in the form of a data frame by preceeding `t_test()` with this construction: `do(1) * t_test(....)`. Try it.
+
+## Inference on a sample proportion
+
+Analogously to `t_test()`, the `binom.test()` and `prop.test()` functions do inference on sample proportions. For a single proportion, `binom.test()` produces the confidence interval on the sample proportion. For two proportions, `prop.test()` gives the confidence interval on the difference between the two proportions. 
+
+To illustrate, let's look at the proportion of people in Galton's data who are taller than 65 inches. 
+
+```{r prop.test, exercise = TRUE}
+binom.test( ~ height > 65, data = Galton)
+prop.test(height > 65 ~ sex, data = Galton)
+```
+
+It may seem a little odd that we are giving you two different functions for proportion tests. Why not just have one function that does it all, as with `t_test()`?  But different approximations are being done with `binom.test()` and with `prop.test()`. 
+
+## Aside: Proportions are means!
+
+So you would like to have just one function for inference on proportions? I like that idea. But while we're at it, let's have the same functions for inference on both means and proportions. Like this:
+
+```{r t-for-prop, exercise = TRUE}
+t_test(~ height > 65, data = Galton)
+t_test(height > 65 ~ sex, data = Galton)
+```
+
+Once you've overcome your reaction that "t-tests are not for proportions," compare the confidence intervals and p-values from the t-test to those from `binom.test()` and `prop.test()`. They are effectively the same. Keep that in mind when we talk about regression as a unifying framework for descriptive and inferential statistics.
+
+
+## Good old Chi-square
+
+The `chisq.test()` function in R carries out the test. For introductory statistics, it's used in mainly two ways:
+
+1. test whether a vector of counts is consistent with a given probability model
+2. test whether two categorical variables are independent of one another by examining a contingency table of counts.
+
+Use `tally()` to produce the vector or contingency table, then apply `chisq.test()`. To illustrate, will use the `KidsFeet` data frame, which has several categorical variables. First, we'll check whether the number of left-handed kids is consistent with a hypothesized 50-50 split in handedness. Then, we'll check whether sex is independent of handedness.
+
+```{r chisq, exercise = TRUE}
+vector_of_counts <- tally( ~ domhand, data = KidsFeet)
+cross_tabulation <- tally(domhand ~ sex, data = KidsFeet)
+chisq.test(vector_of_counts)
+chisq.test(cross_tabulation)
+```
+
+The reason to do the test in two steps -- tally then test -- is to let you look at the tally. We haven't done that in the above chunk, but you can easily add the necessary lines to the command block. (Hint: Give `vector_of_counts` as a command.) 
+
+If you wanted to check the counts of handedness against a more realistic hypothesis than a 50-50 split, you can give an argument `p =` specifying the hypothesized proportions. Try, for instance, `p = c(.25, .75)`.
+ 
