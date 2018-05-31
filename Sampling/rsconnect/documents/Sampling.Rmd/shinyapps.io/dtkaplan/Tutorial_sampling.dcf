@@ -1,0 +1,12 @@
+name: Tutorial_sampling
+title: Tutorial_sampling
+username:
+account: dtkaplan
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 351674
+bundleId: 1402438
+url: https://dtkaplan.shinyapps.io/Tutorial_sampling/
+when: 1527767293.79301
+asMultiple: FALSE
+asStatic: FALSE

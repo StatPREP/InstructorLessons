@@ -3,8 +3,9 @@ Instructor notes at `StatPREP.github.io/InstructorNotes`
 
 Additional tutorials that we might want to repurpose:
 
-# Statistical inference recommendations: Flesh out the stub in Remodeling Statistics on "Teaching Statistical Inference"
+#. Statistical inference recommendations: Flesh out the stub in Remodeling Statistics on "Teaching Statistical Inference"
 #. [Resampling R](https://dtkaplan.shinyapps.io/Resampling) Update to `df_stats()` and post as an instructor tutorial.
+#. Put more data-frame commands in the tutorial on tidy data.
 #. [Explaining the permutation test](https://dtkaplan.shinyapps.io/Permutation_test/#section-many-trials) as an instructor tutorial and then the t-test little app.
 #. [P value variation](https://dtkaplan.shinyapps.io/p_value_interval/) Blog post.
 #. [Densities](https://dtkaplan.shinyapps.io/Densities/). Put this in a blog post.

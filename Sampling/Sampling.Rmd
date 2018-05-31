@@ -1,0 +1,241 @@
+---
+title: "Consequences of Sampling"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(mosaic)
+library(mosaicCore)
+library(ggformula)
+library(mosaicData)
+library(dplyr)
+knitr::opts_chunk$set(echo = FALSE)
+Autos <- 
+  mtcars %>% mutate(model = rownames(mtcars)) %>%
+  filter(!duplicated(disp), !duplicated(mpg), !duplicated(hp)) %>%
+  select(model, mpg, cyl, disp, hp) %>%
+  head(5)
+```
+
+## Sampling introduces variability
+
+Sampling is a data-collection process by which a set of individual cases is selected from a larger group of potential cases. This is usually done as a matter of practicality: it's difficult, expensive, and often impossible to deal with a large number of cases, and so we work with a smaller number drawn from the larger pool. When we calculate a descriptive quantity from a sample, we understand that the result will be *somewhat* different when the process is repeated with a new sample. 
+
+How big is "somewhat"? This question becomes important when we want to compare the descriptive quantity between groups or compare it to a hypothetical value. But for now, we can address it by taking several samples, calculating a descriptive quantity, and observing the variation in that quantity from case to case. This way of addressing the question is particularly feasible when the set of potential cases is contained in a data table; the computer can easily carry out the work.
+
+## Variation
+
+Consider a population consisting of the entire set of runners in a road race. Data on the `r nrow(mosaicData::TenMileRace)` runners in the 2005 Cherry Blossom Ten-miler (available as `TenMileRace` in the `mosaicData` package).  Let's visualize the distribution of `net` race times (in seconds) and calculate the median `net` race time of all `r nrow(mosaicData::TenMileRace)` runners:
+
+```{r pop1, echo = TRUE, exercise = TRUE}
+TenMileRace %>% 
+    gf_density( ~ net)
+TenMileRace %>%             
+    df_stats( ~ net, med = median)      
+```
+
+
+Since we have the population, we can obtain an exact calculation of the median net time.  Thus there's no practical reason to take a sample except to illustrate the variation from one sample to another.  To begin, take a random sample of size $n = 100$ rows from the data table using the `sample_n()` function:
+
+
+```{r echo = FALSE}
+set.seed(101)
+```
+
+```{r samp1, echo = TRUE, exercise = TRUE}
+TenMileRace %>%             # the population
+  sample_n(size = 100)      # take a random sample of 100 runners/rows
+```
+
+Run the code a few times and notice that the sampled racers vary from sample to sample.  What we really want is the median net race time of each sample of runners.  To this end, run the code below to take a sample of 100 runners and calculate their median net time using the `qstats()` function.  Note that both the `sample_n()` and `qstats()` functions take a data table as input and produce a data table as output: tidy programming!
+
+
+```{r samp2, echo = TRUE, exercise = TRUE}
+TenMileRace %>%                  # the population
+  sample_n(size = 100) %>%       # take a random sample of 100 runners/rows
+  df_stats( ~ net, med = median) # calculate the median net race time
+```
+
+Again, run the code a few times.  Note that the median net time in any one, fixed sample is a definite number. However, we can also see that the median net time is a quantity that varies from sample to sample. 
+
+```{r}
+set.seed(NULL)
+```
+
+### Exercise
+
+The code block contains statements for conducting a sampling trial. 
+
+```{r sd_net, exercise = TRUE}
+TenMileRace %>%
+  sample_n(size = ____) %>%
+  df_stats( ~ age, ____)
+```
+
+* Fill in the blanks to arrange the statement to calculate the *standard deviation* (not median) of the `age` of runners in the `TenMileRace` data for a sample size of $n = 50$.
+* Then run the code block several times to get an idea of the sampling variation in the standard deviation of `age` in samples of size $n = 50$.
+
+
+
+## Collecting many sampling trials
+
+
+Running the above code blocks several times gives us a sense of the degree to which the median age can vary from sample to sample.  The distribution of this varying median can be illustrated by conducting a large number of sample-then-describe trials and using the usual tools for displaying and describing a varying quantity.  The `do()` function provides a *tidy* way to construct these trials.  
+
+To illustrate the use and result of `do()`, here are four trials of the process of obtaining a sample of $n=100$ runners and calculating their median net race time.  These results are stored as "`Trials`":
+
+
+```{r do2, exercise = TRUE, echo = TRUE}
+Trials <- do(4) * {
+    TenMileRace %>%
+        sample_n(size = 100) %>%
+        df_stats( ~ net, med = median)
+}
+Trials
+```
+
+Restricting our exploration to only four trials give us a limited idea of how much the median varies from one sample to another.  (Among `r dim(TenMileRace)[1]` runners, there are more than $2.5*10^{235}$ unique samples of 100 runners!)  Let's increase the number of trials to 200. Do keep in mind that the size of the sample is distinct from the number of sampling trials.
+
+```{r do3, exercise = TRUE, echo = TRUE}
+Trials <- 
+  do(200) * {
+    TenMileRace %>%
+      sample_n(size = 100) %>%
+      df_stats( ~ net, med = median)
+  }
+
+gf_density( ~ med, data = Trials) %>%
+  gf_lims(x = c(4800, 6200))
+
+df_stats( ~ med, data = Trials, mean, sd)
+```
+
+Our result: 200 median net times calculated from 200 unique samples of 100 runners.  The density plot illustrates the variability among these 200 medians.  The `qstats()` output summarizes the mean and standard deviation of the 200 medians.  
+
+
+### Exercise
+
+
+```{r q1, echo=FALSE}
+question("Among the 200 samples, what was smallest median net race time that we observed?",
+  answer("roughly 5200 seconds", correct = TRUE),
+  answer("roughly 5555 seconds", correct = FALSE),
+  answer("roughly 6000 seconds", correct = FALSE),
+  allow_retry = TRUE
+)
+```
+
+```{r q2, echo=FALSE}
+question("Among the 200 samples, what was the typical median net time?",
+  answer("roughly 5200 seconds", correct = FALSE),
+  answer("roughly 5555 seconds", correct = TRUE),
+  answer("roughly 6000 seconds", correct = FALSE),
+  allow_retry = TRUE
+)
+```
+
+
+```{r q3, echo=FALSE}
+question("How would you describe the shape of the 200 sample medians?",
+  answer("left skewed", correct = FALSE),
+  answer("bell shaped", correct = TRUE),
+  answer("right skewed", correct = FALSE),
+  allow_retry = TRUE
+)
+```
+
+
+
+## Sample Size $n$
+
+The 200 sample medians above were calculated from samples of $n=100$ runners.  Before trying the exercises below, check your intuition about what would happen if we were only able to sample $n=25$ runners:    
+
+- What will be the typical net race time calculated from samples of $n=25$ runners?  That is, where will the distribution of sample medians be centered?
+
+- Will there be more or less variability in median net times calculated from samples of $n=25$ runners than from samples of $n=100$ runners?  That is, how if at all will the width of the distribution of sample medians change?
+
+### Exercise
+
+Adapt the code below to obtain 200 samples of size $n=25$ runners and calculate the median for each.  Repeat this for $n=100$ and $n=600$.  In light of the results, how does sample size impact the width and location of the distribution of sample medians?
+
+```{r do4, exercise = TRUE, echo = TRUE}
+Trials <- 
+  do(200) * {
+    TenMileRace %>%
+      sample_n(size = ___) %>%
+      df_stats( ~ net, med = median)
+  }
+
+gf_density( ~ median, data = Trials) %>%
+  gf_lims(x = c(4800, 6200))
+
+df_stats( ~ med = median, data = Trials, mean, sd)
+```
+
+
+
+### Exercise
+
+Find the sample size where the sample medians all fall within 60 seconds of the population median (5555 seconds), ie. between 5495 and 5615 seconds.  HINT: It might help to change the `gf_lims`!
+
+
+```{r do5, exercise = TRUE, echo = TRUE}
+Trials <- 
+  do(200) * {
+    TenMileRace %>%
+      sample_n(size = ___) %>%
+      df_stats( ~ net, med = median)
+  }
+
+gf_density( ~ med, data = Trials) %>%
+  gf_lims(x = c(4800, 6200))
+```
+
+
+### Exercise
+
+Find the sample size where you get a clear separation of the distribution of median net times for women and for men.
+```{r compare_sexes, exercise = TRUE}
+Trials <- 
+  do(200) * {
+    TenMileRace %>%
+      sample_n(size = 25) %>%
+      df_stats(net ~ sex, med = median)
+  }
+gf_density(~ med, data = Trials, fill = ~ sex, alpha=0.5)
+```
+<div id="compare_sexes-hint">Adjust the `size` in `sample_n()`. This controls how the size $n$ of the sample. In contrast, the number of trials, set by `Do(200)` is not important so long as it is a reasonable size: 100s.</div>
+
+
+
+## Pedagogical note
+
+The point of this activity is to examine how much variation is introduced by the taking of a random sample from a hypothetical population. On the computer, sampling from an existing data set is effortless. In reality, sampling involves work and can be the hardest and most time consuming aspect of a study. 
+
+The authentic purpose for sampling is gather useful data while keeping small the effort and time involved (and in some situations, risk and destruction). Our sampling on the computer is a way to explore a "what if" question: How big is the variation and uncertainty introduced by using random sampling to collect data? 
+
+It would be unfortunate if your students emerged from their statistics class with the incorrect notion that the purpose of sampling is to construct confidence intervals. It's the reverse; we construct confidence intervals in order to describe the uncertainty introduced by sampling.
+
+Try to have your students undertake sampling in a more authentic way. Set up an investigation, asking students to collect a sample in order to make an estimate of a quantity to a given precision. 
+
+### Example 1: Global toss
+
+How much of the Earth's surface is covered by water? 
+
+As an in-class activity, acquire an inflatable beach-ball type globe. (A web search will quickly locate such balls for sale.)
+
+Toss the ball to a student. Ask whether his or her middle left finger is on land or water. (If they are unsure, have the student toss the ball again with a little spin and catch it.) Record the answer. 
+
+Have the student gently toss the ball a ways across the room, to another student. Record whether *that* student's left middle finger is covering land or water. Continue for several more tosses.
+
+After five to ten tosses, calculate the fraction of times that the finger covered land. Then ask the students whether they think that answer is reliable. Discuss how to quantify reliability. Propose that an answer within 5% would be good enough to be useful. How many times should the ball be tossed to get a reliable answer? Also discuss the *bias*: Is the globe a good representation of the Earth? Is there something about the left-middle-finger method or the way the globe is being tossed that might systematically distort the answer? 
+
+You can also frame the activity as a way of answering a comparison question, e.g. Which is bigger, Africa or the Americas combined? How could you know when you have collected enough data to get a reliable answer?
+
+### Activity 2: Pages in books
+
+Ask students to find out the length of books, in pages, in the reference section of the library. Have them design a plan for drawing a random sample. Tell them that you want the answer to be accurate to within 50 pages.
+
+
