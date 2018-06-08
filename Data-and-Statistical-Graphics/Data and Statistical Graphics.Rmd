@@ -1,0 +1,584 @@
+---
+title: "Data, Statistical, and Inferential Graphics"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = FALSE,
+                      fig.width = 5, fig.height = 2.5,
+                      warning = FALSE)
+```
+
+
+ 
+```{r include = FALSE}
+library(SDSdata)
+library(mosaic)
+library(mosaicCore)
+library(mosaicModel)
+library(NHANES)
+library(ggformula)
+theme_set(theme_bw())
+```
+
+<!-- Tutorial based on Danny's SDS chapter -->
+
+## The Graphics Goal
+
+Goal: Translate the contents of data frames into representative and telling images. 
+* Creating such statistical images constitutes a fundamental way
+of turning *data* into *information*. 
+
+* Often this amounts to making sure that **important differences** can be
+**easily** and **accurately** seen.
+
+* This tutorial introduces 
+
+    * techniques for **designing** and **generating** stat graphics 
+    
+    * concepts and conventions for **reading** stat graphics
+   
+Note: Before students can **see to learn**, they need to **learn to see**.
+
+* Providing them with a good framework and vocabulary for communicating about
+graphics is one step in this process.
+
+## Three types of graphs
+
+It's helpful in discussing stat graphics to think about three distinct graphical modes, each of which has its own characteristic icons.
+
+1. **Data graphics** --  each row in a tidy data frame is represented by a 
+simple mark, also known as a **glyph**.
+
+2. **Statistical graphics** -- visual summary of overall trends across 
+many rows of a data frame.
+
+3. **Inferential graphics** -- graphics designed to help the informed reader
+judge whether the trends seen in statistical graphics 
+
+    * carry genuine meaning, or 
+    
+    * are better thought of as the kinds of illusory, accidental patterns we see in
+like animal shapes in clouds or archers and crabs in the stars.
+
+    Inferential graphics are important to keep us from placing too much meaning
+    in spurious patterns.
+
+Often two or more types of graphs are overlaid into a single plot.
+
+
+## The graphics frame
+
+A **graphic frame** is the structure for organizing stat graphics.
+
+* Mathematicians like to call this "Cartesian coordinates" or "x-y axes" (but 
+other sorts of frames are possible).
+
+### Properties of a graphic frame
+
+* **size**: physical extent on paper or screen
+* **x** variable: A variable (from a tidy data frame) assigned to the x-axis.
+* **y** variable: Another variable assigned to the y-axis. 
+
+#### Example
+
+The tradition in mathematics is to call the horizontal axis "x" and the vertical
+axis "y." But in statistics we deal with so many variables that it's better to
+call the axes by the names of the variables they represent. To illustrate,
+Figure \@ref(fig:frame1) shows a graphical frame defined by the variables height
+and age.
+
+```{r frame1, echo=FALSE, fig.cap = "A graphics frame for presenting data on height and age, as from the [NHANES data frame](ftp://cran.r-project.org/pub/R/web/packages/NHANES/NHANES.pdf).", message = FALSE, warning = FALSE}
+gf_blank(Height ~ Age, data = NHANES)
+```
+
+### Graphics frames with categorical variables {-}
+
+You can also use a graphics frame to represent the values of a 
+*categorical* variable. We use evenly spaced positions along an axis
+and asign them to levels (possible values) of the variable.
+
+#### Example
+
+```{r frame3, echo = FALSE, fig.cap="A graphics frame defined by one quantitative and one categorical variable.", message = FALSE, error = FALSE, warning = FALSE}
+gf_blank(Height ~ Education, data = NHANES %>% select(Height, Education) %>% na.omit()) %>%
+  gf_theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## Data graphics
+
+Pick
+
+* a variable (your choice) to put along horizontal axis
+* a variable (your choice) to put along vertical axis
+* (optional) other variables that determine color, shape, size, etc.
+
+### Example: Height by Age
+
+This plot uses a dot (●) for each row of some data coming from the NHANES study.
+
+```{r frame2, echo = FALSE, fig.cap="200 rows from the `NHANES` data frame represented as glyphs, one for each row, in the height vs age graphical frame.", warning = FALSE, message=FALSE }
+set.seed(101)
+gf_blank(Height ~ Age, data = NHANES) %>%
+  gf_point(Height ~ Age, data = sample_n(NHANES, size = 200))
+```
+
+### Example: Height by Education
+
+```{r frame2b, echo = FALSE, fig.cap="200 rows from the `NHANES` data frame in the height vs education graphical frame. Note how the individual glyphs overlap in some places. This problem, over-plotting, becomes more of a problem when many more rows are being plotted.", warning = FALSE }
+set.seed(101)
+gf_point(Height ~ Education, 
+           data = sample_n(NHANES %>% select(Height, Education) %>% na.omit(), 
+                           size = 200)) %>%
+  gf_theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+
+### Jittering {-}
+
+Rather than placing the glyph exactly at the position for its categorical 
+level, it's helpful to move it a small random distance to the right or left
+when the exaplantory variable is categorical. This is called **jittering**.
+
+* No loss of information (we can still tell the values of x and y for each variable)
+* Reduces overplotting (so may gain information)
+* Gives a better representation of the data
+
+
+```{r frame2c, echo = FALSE, fig.cap="1000 rows from the `NHANES` data frame using jittering to avoid overplotting.", warning = FALSE }
+set.seed(101)
+gf_jitter(Height ~ Education, height = 0, width = 0.15,
+           data = sample_n(NHANES %>% select(Height, Education) %>% na.omit(), size = 1000)) %>%
+  gf_theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+### Transparency
+
+Another simple way to deal with overplotting when working with data frames with
+thousands of rows is to make the glyphs somewhat transparent. That way, overlap
+of glyphs is signalled by relative darkness.
+
+```{r frame2d, echo = FALSE, fig.cap="10000 rows from the `NHANES` data frame using both jittering and transparency to avoid overplotting.", warning = FALSE }
+gf_jitter(Height ~ Education, 
+          height = 0, width = 0.15, alpha = 0.15, seed = 101,
+          data = NHANES %>% select(Height, Education, AgeDecade) %>% na.omit()) %>%
+  gf_theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+```
+
+## Two Categorical Variables
+
+### Jittering both categorical variables
+
+Jitter can be used for two categorical variables.
+
+```{r categorical_jitter, fig.cap = "A jitter plot of education vs age decade for the NHANES data. Each row in NHANES is one dot in the plot."}
+gf_jitter(Education ~ AgeDecade, data = NHANES, alpha = 0.1)
+```
+
+#### Your Turn
+
+1. What trends do you see in the plot above?
+2. What might explain those trends?
+
+### Smoothing the jitter
+
+In reading the dots it's mainly the overall darkness of the squares that we
+read. We could replace each square with one that's uniformly dark and still get
+the same information. Like this:
+
+```{r with_patches, fig.cap="A frame of two categorical variables with the number of cases at each combination of levels shown as opacity. This is a statistical graphic, not a data graphic."}
+NHANES %>%
+  group_by(Education, AgeDecade) %>%
+  tally() %>%
+  gf_point(Education ~ AgeDecade, alpha = ~ n, size = 10, shape = 15)
+```
+
+```{r include = FALSE}
+NHANES %>%
+  gf_point(Education ~ AgeDecade, alpha = 0.002, size = 10, shape = 15)
+```
+
+#### Your turn
+
+1. Is the plot above a data graphic?
+2. Can you find someone who disagrees with you?
+
+<!-- This could be either:   -->
+<!-- If we make one box per grouping, it is a statistical graphic.   -->
+<!-- If we overlay lots of semi-transparent squares, it's a data graphic. -->
+
+## Statistical graphics
+
+We can make the previous figure two ways:
+
+1. Place a semi-transparent square for each observation (data graphic)
+
+    * 10,000 squares with lots of overplotting
+
+2. Place one square at each of the 45 grid locations and use the 
+number of values (a statistic) to determine its color/transparncy (stat graphic).
+
+    * 45 squres using a statstic (count) computed from the original data.
+
+The second option is more efficient and provides us more control.
+
+
+### Cross tabulation -- Is this a graph?
+
+The particular marks used in Figure \@ref(fig:with_patches) are only modestly
+successful at displaying the count. People are not very accurate at perceiving
+shades and things become hopeless when the counts differ by a factor of ten or
+one-hundred or more. So, for showing counts, another graphical style is
+perferred, the *cross tabulation*.
+
+```{r comment = "", echo=FALSE}
+tally(Education ~ AgeDecade, data = NHANES)
+```
+
+```{r tab1, fig.cap="A cross-tabulation of education versus age decade", fig.align="center", echo=FALSE}
+knitr::include_graphics("images/nil.png")
+```
+
+It's not conventional to call a cross-tabulation a "graphic." But it has all
+the elements:
+
+* graphics frame: education vs age decade 
+* glyph: a number
+
+It is a **statistical graphic** becuase we have one mark for 
+each group of values for which we have computed a count.
+
+Perhaps this makes a cross tabluation feel more like a graphic:
+
+```{r, cross-tabl-graph, fig.width = 7}
+tally(Education ~ AgeDecade, data = NHANES, format = "data.frame") %>%
+  gf_point(Education ~ AgeDecade, alpha = ~ Freq, 
+           color = "red", size = 10, shape = 15) %>%
+  gf_text(Education ~ AgeDecade, 
+          label = ~ Freq, size = 4, angle = 30,
+          color = "navy", alpha = 0.8)
+```
+
+### Segmented bar charts
+
+Here is another common graphical presentation of counts in the
+form of a printed table. 
+<!-- There are also non-text graphics for counts, but these -->
+<!-- are effective only in cases where the entries are not too far ranging in -->
+<!-- magnitude. Figure \@ref(fig:bar1) shows an example -->
+
+```{r bar1, fig.cap = "A non-text, graphical presentation of counts."}
+gf_counts( ~ AgeDecade, fill = ~ Education, data = NHANES, alpha = 0.5)
+```
+
+These can be hard to read.
+
+* Although labelled "count," the vertical axis is really accomplishing 
+two things at once. 
+
+    * The overall height of each bar tells the number of rows 
+    from the data frame that fall into each age decade. 
+    
+    * A second variable, `education`, is being displayed using **fill color**. 
+    For each bar, the colors show the number of data table rows at each 
+    educational level. Because the same colored segments don't have the same
+    starting position, they can be difficult to compar accurately.
+
+### Proportions in bar charts    
+
+Sometimes proportions are displayed rather than counts.
+
+```{r bar2, echo=FALSE, fig.cap="A graphic showing the proportion of people at each educational level for the various age decades."}
+gf_counts( ~ AgeDecade, fill = ~ Education, data = NHANES, alpha = 0.5, 
+           position = "fill")
+```
+
+### Means and such
+
+For a quantitative variable, two very commonly used statistical summaries are
+the **mean** and **median**. There are many other possibilities:
+
+  * min
+  * max
+  * 75th percentile
+  * etc.
+  
+Here is a figure that shows such a data graphic, 
+but with another **layer** added to show a statistical summary with the mean.
+
+```{r mean-graphic, echo = FALSE, fig.cap="Combining a data graphic (the jittered points) with a statistical graphic (the horizontal lines). The statistic displayed is the mean height.", fig.align="center", warning=FALSE}
+gf_jitter(Height ~ Education, data = NHANES %>% filter(!is.na(Education)),
+          size = 1, alpha = 0.06) %>%
+  gf_errorbar(
+    mean_Height + mean_Height ~ Education, 
+    data = df_stats(
+      Height ~ Education, 
+      data = NHANES %>% filter(!is.na(Education)), mean),
+    color = "blue", size = 1) %>%
+  gf_theme(axis.text.x = element_text(angle = 30, hjust = 1))
+```
+
+### Glyphs for statistical graphics
+
+In the Little Apps, we have chosen to use "horizontal" glyphs for 
+statistical graphics (so they are quickly identifiable as statistical layers).
+So we use horizontal lines rather than dots.
+
+#### Your turn
+
+1. How is height related to education level?
+2. What are some possible explanations for this trend? 
+3. Which do explanations do you find plausible? implausible?
+
+
+## Statistical Functions
+
+When describing the relationship between two quantitative variables, a powerful
+summary of the aggregate properties of the data is to describe the relationship
+as a **function**. Since the aggregate properties are being described, the
+appropriate statistical graphic is a graph of the function.
+
+```{r pulse-bp, echo=FALSE, fig.cap="A graphic with two layers -- a data layer and a statistical layer -- showing the relationship between pulse rate and blood pressure in the NHANES data.", fig.align="center"}
+gf_jitter(BPSysAve ~ Pulse, data = NHANES, 
+          alpha = 0.02, height=0, width=1) %>% 
+  gf_lims(x = c(40,120), y= c(75, 175)) %>%
+   gf_lm() %>%
+  gf_labs(y = "Blood pressure")
+```
+
+The particular function shown here suggests that people
+with higher pulse rates tend to have lower blood pressure.
+
+## Inferential graphics
+
+Recall that the descriptive statistical layers above 
+suggest a **relationship** between
+the two variables being displayed: the mean height increases with increasing
+education and the average blood pressure decreases with increasing pulse rate.
+
+One of the important contributions of stats as a science is to provide methods
+to assess whether such patterns are genuinely informative. These methods produce
+what are called **inferential statistics**. And, just as the Little Apps use 
+a horizontal style for displaying descriptive statistics
+they use a vertical graphical style for displaying inferential statistics.
+
+
+### Error bars 
+
+```{r height-inferential, fig.cap="Two forms of inferential statistics for the relationship of height versus education: *prediction* intervals and *confidence* intervals."}
+mod1 <- lm(Height ~ Education, data = NHANES)
+Pred <- mod_eval(mod1, nlevels = 5, interval="prediction")
+Conf <- mod_eval(mod1, nlevels = 5, interval="confidence")
+P <- gf_jitter(Height ~ Education, data = NHANES %>% filter(!is.na(Education)), alpha = 0.01) %>%
+  gf_errorbar(model_output + model_output ~ Education, data = Pred, 
+              color = "blue") 
+  
+P %>%
+  gf_errorbar(lower + upper ~ Education, data = Pred, color = "blue", width = 0.3) %>%
+  gf_labs(title = "95% prediction intervals") %>%
+  gf_theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+
+P %>%
+  gf_errorbar(lower + upper ~ Education, data = Conf, color = "blue", width = 0.3) %>%
+  gf_labs(title = "95% confidence intervals") %>%
+  gf_theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+```
+
+The I-beam shaped marks are widely called **error bars** in many natural and
+social science fields. In stats, they are also called **intervals**.
+
+The range covered by the intervals corresponds to some measure of the 
+precision of the statistic. 
+
+* **prediction intervals** measure the precision of predictions that can be made about an **individual**. 
+
+    * For example, if asked to predict the height of a high-school graduate, 
+    the function derived from the `CPS85` data indicates that the person would 
+    be between 149 and 188 cm in height. Looking at the graph you can see 
+    that each of the prediction intervals covers a broad range of heights 
+    and that the intervals for the different education levels overlap a lot. 
+    In everyday speech, this could be described as, 
+    "Education level hardly tells you anything about how tall a person is."
+
+* **confidence intervals** measure the precision of the estimated statistic.
+
+    * Rather than making a prediction about an individual person, the prediction
+    is being made about the result of a whole new random sample of data about
+    height and education. If such a new sample (of the same size as NHANES and
+    from the same population) were taken, likely the calculated mean height for
+    each group would be somewhat different from what we found in NHANES. How
+    different? That's what the confidence interval tells you. In other words,
+    confidence intervals are about how precisely the study was done while
+    prediction intervals are about what the data have to suggest for predictions
+    about an individual for whom you know education level but not height.
+
+Confidence intervals are always narrower than prediction intervals. 
+
+### Error Bands
+
+When the descriptive statistic is a function relating two quantitative
+variables, the inferential statistic equivalent of prediction and confidence
+intervals are called prediction and confidence **bands**. Such bands are also
+drawn with the vertical component.
+
+```{r pulse-bp-inferential, echo=FALSE, fig.cap="A graphic with three layers -- a data layer, a statistical layer, and a statistical inference layer. Left: prediction band. Right: confidence band", fig.align="center"}
+P <- gf_jitter(BPSysAve ~ Pulse, data = NHANES %>% sample_n(size = 1000), 
+          alpha = 0.05, height=0, width=1) %>% 
+  gf_lims(x = c(40,120), y= c(75, 175)) %>%
+  gf_labs(y = "Blood pressure")
+P  %>% gf_lm(interval = "prediction") 
+P  %>% gf_lm(interval = "confidence")
+```
+
+
+## A trend in height?
+
+### Height and Education
+
+<!-- Referring to Figure \@ref{frame2d}, introduce the stat showing the trend across -->
+<!-- education levels, that people get taller with higher levels of education. Give -->
+<!-- the inferential stat and show that the trend is for real. -->
+
+```{r eframe1, echo = FALSE,  warning = FALSE }
+ci.mean = mosaicCore::ci.mean
+Stats <- df_stats(Height ~ Education, data = NHANES, mean, ci.mean)
+gf_jitter(
+  Height ~ Education, height = 0, width = 0.15, alpha = 0.08, seed = 101,
+  data = NHANES %>% select(Height, Education, AgeDecade) %>% na.omit()) %>%
+  gf_errorbar(lower + upper  ~ Education, data = Stats, 
+              color = "red", width = 0.9) %>% 
+  gf_theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+```
+
+### Education or age?
+
+<!-- One possible explanation for the relationship between height and educational -->
+<!-- level concerns age. Decades ago, a much smaller proportion of the population -->
+<!-- graduated from high-school. Similarly, nutrition was worse, which can inhibit -->
+<!-- growth. So perhaps the apparent relationship between height and education is -->
+<!-- really about height and the nutritional conditions when growing up. ... Here's a -->
+<!-- graph showing inferential statistics by age decade. The people aged 20-29 grew -->
+<!-- kup in the last two decades, the people 70+ grew up 50 years before. -->
+
+```{r eframe2, echo = FALSE, warning = FALSE }
+set.seed(101)
+stats <- df_stats(Height ~ Education + AgeDecade, data = NHANES, mean, ci.mean)
+# gf_jitter(Height ~ Education, height = 0, width = 0.15, alpha=0.15,
+#            data = NHANES %>% select(Height, Education, AgeDecade) %>% na.omit()) %>%
+  gf_errorbar(lower + upper  ~ Education | AgeDecade, data = stats, color = "red", width = 0.9) %>%
+  gf_theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+```
+
+### Age and education?
+
+Looking at the same inferential statistics, we
+can redefine the graphics frame so that age is on the x-axis and education is
+used for facetting. Doing this draws attention to the relationship of height
+versus age *given* a level of education. 
+
+What can you see now?
+
+
+```{r eframe3, echo = FALSE, warning = FALSE }
+set.seed(101)
+stats <- df_stats(Height ~ Education + AgeDecade, data = NHANES, mean, ci.mean)
+# gf_jitter(Height ~ Education, height = 0, width = 0.15, alpha=0.15,
+#            data = NHANES %>% select(Height, Education, AgeDecade) %>% na.omit()) %>%
+  gf_errorbar(lower + upper  ~ AgeDecade | Education, data = stats, color = "red", width = 0.9) %>%
+  gf_theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+```
+
+
+### And then there's gender.
+
+Sometimes, the confidence intervals get smaller if we add still more variables
+to the display. For instance, we know that women's heights tend to be smaller
+than men's.
+
+```{r eframe5, echo = FALSE, fig.cap="Inferential graphics on their own. The far separation between the confidence intervals is often misleadingly described using a technical terms with a meaning different from that of everyday speech: very highly statistically significant.", warning = FALSE }
+stats <- df_stats(Height ~ Gender, data = NHANES, mean, ci.mean)
+# gf_jitter(Height ~ Education, height = 0, width = 0.15, alpha=0.15,
+#            data = NHANES %>% select(Height, Education, AgeDecade) %>% na.omit()) %>%
+  gf_errorbar(lower + upper  ~ Gender, data = stats, color = ~ Gender, width = 0.9) 
+```
+
+<!-- The viewer of such a graph might understandably be misled into thinking that -->
+<!-- women are much shorter than men. After all, the confidence intervals are widely -->
+<!-- separated. Such a pattern is called "statistically significant" and a spread as -->
+<!-- big as that seen in Figure \@ref(fig:eframe5) would be labelled "very highly -->
+<!-- statistically significant." (Significance is generally quantified with a number -->
+<!-- called a "p-value." By convention, a p-value of 0.05 or less is called -->
+<!-- "statistically significant," and a value of 0.001 or less is called "highly -->
+<!-- statistically significant." The p-value corresponding to Figure -->
+<!-- \@ref(fig:eframe5) is p < 0.000000000000001.) The use of the word "significant" -->
+<!-- in this context is traditional, but has been strongly criticized for decades. -->
+<!-- The reason: statistically significant absolutely does not mean "important in -->
+<!-- practice." Here are two plots that add context to show that the differences -->
+<!-- between women's and men's heights are not as large as might be suggested by -->
+<!-- "very highly statistically significant." -->
+
+To put the inferential statistics in the context of the practical meaning of
+height differences between men and women, either or both of two techniques can
+be used. First, the height axis can be arranged to show the differences on a
+scale of the typical height, as in Figure \ref(fig:eframe5b). This is
+accomplished by rooting the vertical axis at zero height, just as our feet are
+rooted on the floor. You can also show the inferential statistics in the context
+of the person-to-person variation of height, as in Figure \ref{fig:eframe5c}.
+
+```{r eframe5b, echo = FALSE, fig.cap="Inferential graphics with an axis scale that allows the difference between the sexes to be set in context of the height itself. ", warning = FALSE }
+stats <- df_stats(Height ~ Gender, data = NHANES, mean, ci.mean)
+# gf_jitter(Height ~ Education, height = 0, width = 0.15, alpha=0.15,
+#            data = NHANES %>% select(Height, Education, AgeDecade) %>% na.omit()) %>%
+  gf_errorbar(lower + upper  ~ Gender, data = stats, color = ~ Gender, width = 0.9) %>%
+  gf_theme(axis.text.x = element_text(angle = 45, hjust = 1)) %>%
+    gf_lims(y = c(0, NA))
+```
+
+```{r eframe5c, echo = FALSE, fig.cap="Putting the inferential statistics in the context of the person-to-person variability in height.", warning = FALSE }
+stats <- df_stats(Height ~ Gender, data = NHANES, mean, ci.mean)
+gf_jitter(Height ~ Gender, height = 0, width = 0.15, alpha=0.025, data = NHANES) %>%
+  gf_errorbar(lower + upper  ~ Gender, data = stats, color = ~ Gender, width = 0.9) %>%
+    gf_lims(y = c(0, NA))
+```
+
+There is a clear trend in the differences between
+females and males, and that there is a lot of overlap in the heights of
+individual females and males. One way to think of this is as a guessing game.
+Suppose you were given the heights of two people, one male and one female.
+You're asked to guess, knowing just their height, which of those two people is
+female. Playing the odds, you'll probably guess that the taller one is male.
+This will be right much of the time, but it will also be wrong a lot of the
+time.
+
+Now change the game. You're being given the heights of two groups of 5000 people
+each. One group is females, the other males. Your job is to guess which group is
+which. A simple and highly effective strategy is to calculate the mean height of
+each group and declare the group with the shorter mean height to be female. This
+will be right 100% of the time.
+
+Statistical "significance" is about group differences. Practical significance is
+about individual differences.
+
+
+### Putting it all together
+
+What do you see now, when sex differences between the sexes are taken into account?
+
+```{r eframe6, echo = FALSE,  warning = FALSE }
+stats <- df_stats(Height ~ Education + AgeDecade + Gender, data = NHANES, mean, ci.mean)
+gf_errorbar(lower + upper  ~ AgeDecade | Education, data = stats, 
+            color = ~ Gender, width = 0.9) %>%
+  gf_theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+```
+
+## Scratch Paper
+
+```{r, playpen, exercise = TRUE}
+
+```
