@@ -11,5 +11,5 @@ Additional tutorials that we might want to repurpose:
 #. [Designing density graphics](https://dtkaplan.shinyapps.io/Conditional_densities/#section-guiding-the-eye). A blog post, too?
 #. Relative risk. Write a little app about relative risk using bootstrapping and randomization to get inferential statistics.
 #. Add resampling to t-test little app
-#. Make something out of the Montana poll.
+#. Make something out of the Montana poll. 
 
