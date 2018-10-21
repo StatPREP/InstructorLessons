@@ -5,8 +5,8 @@ account: dtkaplan
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 351674
-bundleId: 1402438
+bundleId: 1654240
 url: https://dtkaplan.shinyapps.io/Tutorial_sampling/
-when: 1527767293.79301
+when: 1540139086.8175
 asMultiple: FALSE
 asStatic: FALSE

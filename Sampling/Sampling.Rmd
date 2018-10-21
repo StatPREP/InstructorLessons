@@ -168,10 +168,10 @@ Trials <-
       df_stats( ~ net, med = median)
   }
 
-gf_density( ~ median, data = Trials) %>%
+gf_density( ~ med, data = Trials) %>%
   gf_lims(x = c(4800, 6200))
 
-df_stats( ~ med = median, data = Trials, mean, sd)
+df_stats( ~ med, data = Trials, mean, sd)
 ```
 
 
